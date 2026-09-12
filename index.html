@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physio Training</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+<meta name="theme-color" content="#1f8f8a">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<meta
+  name="apple-mobile-web-app-status-bar-style"
+  content="default"
+>
+
+<meta
+  name="apple-mobile-web-app-title"
+  content="Physio Training"
+>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- STARTSEITE -->
+  <main class="app-container view active-view" id="homeView">
+
+    <section class="hero">
+      <p class="eyebrow">Physio Training</p>
+      <h1>Was möchtest du heute machen?</h1>
+      <p class="subtitle">
+        Trainingspläne erstellen, Übungen verwalten und dein eigenes Training dokumentieren.
+      </p>
+    </section>
+
+    <section class="menu-grid">
+
+      <button class="menu-card primary" id="newPlanButton">
+        <span class="icon">＋</span>
+        <span class="card-text">
+          <strong>Neuer Trainingsplan</strong>
+          <small>Übungen auswählen und als PDF ausgeben</small>
+        </span>
+      </button>
+
+      <button class="menu-card">
+        <span class="icon">🏋️</span>
+        <span class="card-text">
+          <strong>Mein Training</strong>
+          <small>Eigenes Training dokumentieren</small>
+        </span>
+      </button>
+
+      <button class="menu-card" id="libraryButton">
+        <span class="icon">☰</span>
+        <span class="card-text">
+          <strong>Übungsbibliothek</strong>
+          <small>Übungen ansehen und verwalten</small>
+        </span>
+      </button>
+
+      <button class="menu-card" id="savedPlansButton">
+        <span class="icon">▣</span>
+        <span class="card-text">
+          <strong>Gespeicherte Pläne</strong>
+          <small>Vorhandene Trainingspläne öffnen</small>
+        </span>
+      </button>
+
+    </section>
+
+  </main>
+
+
+  <!-- ÜBUNGSAUSWAHL -->
+  <main class="app-container view" id="exerciseView">
+
+    <button class="back-button" id="backButton">
+      ← Zurück
+    </button>
+
+    <section class="hero">
+      <p class="eyebrow">Neuer Trainingsplan</p>
+      <h1>Übungen auswählen</h1>
+      <p class="subtitle">
+        Wähle die Übungen aus, die in den Trainingsplan übernommen werden sollen.
+      </p>
+    </section>
+
+    <div class="search-container">
+      <input
+        type="text"
+        id="exerciseSearch"
+        placeholder="Übung suchen ..."
+      >
+    </div>
+
+    <div class="filter-row">
+      <button class="filter-button active-filter">Alle</button>
+      <button class="filter-button">Unterkörper</button>
+      <button class="filter-button">Oberkörper</button>
+      <button class="filter-button">Rumpf</button>
+      <button class="filter-button">Mobilität</button>
+    </div>
+
+    <section class="exercise-list">
+
+<section
+  class="exercise-list"
+  id="exerciseList"
+>
+</section>
+
+    </section>
+<div class="selection-footer">
+
+  <span id="selectionCount">
+    0 Übungen ausgewählt
+  </span>
+
+  <button
+    class="continue-button"
+    id="continueButton"
+    disabled
+  >
+    Weiter →
+  </button>
+
+</div>
+  </main>
+<!-- TRAININGSPLAN BEARBEITEN -->
+
+<main class="app-container view" id="planView">
+
+  <button class="back-button" id="backToExercisesButton">
+    ← Übungen
+  </button>
+
+  <section class="hero">
+
+    <p class="eyebrow">
+      Neuer Trainingsplan
+    </p>
+
+    <h1>Plan bearbeiten</h1>
+
+    <p class="subtitle">
+      Lege die Vorgaben für die ausgewählten Übungen fest.
+    </p>
+
+  </section>
+
+
+  <section
+    class="plan-exercises"
+    id="planExercises"
+  >
+  </section>
+
+<div class="plan-footer">
+
+  <button
+    class="secondary-button"
+    id="savePlanButton"
+  >
+    Plan speichern
+  </button>
+
+<button
+  class="secondary-button hidden"
+  id="homeFromPlanButton"
+>
+  Zur Startseite
+</button>
+
+  <button
+    class="continue-button"
+    id="toPdfButton"
+  >
+    Weiter zur PDF →
+  </button>
+
+</div>
+
+</main>
+<!-- PDF KONFIGURIEREN -->
+
+<main class="app-container view" id="pdfConfigView">
+
+  <button class="back-button" id="backToPlanButton">
+    ← Plan bearbeiten
+  </button>
+
+  <section class="hero">
+    <p class="eyebrow">Trainingsplan</p>
+    <h1>PDF konfigurieren</h1>
+    <p class="subtitle">
+      Lege fest, was die Patientin auf dem Trainingsbogen dokumentieren kann.
+    </p>
+  </section>
+
+
+  <section class="config-card">
+
+    <div class="config-section">
+
+      <h2>Trainingseinheiten</h2>
+
+      <p class="config-description">
+        Wie viele Trainingstage sollen auf einem Blatt dokumentiert werden können?
+      </p>
+
+      <div class="session-options">
+
+        <label>
+          <input type="radio" name="sessions" value="8">
+          <span>8</span>
+        </label>
+
+        <label>
+          <input type="radio" name="sessions" value="10" checked>
+          <span>10</span>
+        </label>
+
+        <label>
+          <input type="radio" name="sessions" value="12">
+          <span>12</span>
+        </label>
+
+      </div>
+
+    </div>
+
+
+    <div class="config-section">
+
+      <h2>Dokumentation</h2>
+
+      <p class="config-description">
+        Wähle aus, welche zusätzlichen Angaben auf dem Trainingsbogen erscheinen.
+      </p>
+
+
+      <label class="toggle-row">
+
+        <div>
+          <strong>Schmerz pro Übung</strong>
+          <small>Schmerzintensität von 0–10</small>
+        </div>
+
+        <input
+          type="checkbox"
+          id="includeExercisePain"
+          checked
+        >
+
+      </label>
+
+
+      <label class="toggle-row">
+
+        <div>
+          <strong>24-h-Reaktion</strong>
+          <small>Reaktion am Folgetag dokumentieren</small>
+        </div>
+
+        <input
+          type="checkbox"
+          id="include24h"
+          checked
+        >
+
+      </label>
+
+
+      <label class="toggle-row">
+
+        <div>
+          <strong>Allgemeiner Schmerz</strong>
+          <small>Schmerz 0–10 pro Trainingseinheit</small>
+        </div>
+
+        <input
+          type="checkbox"
+          id="includeGeneralPain"
+          checked
+        >
+
+      </label>
+
+
+      <label class="toggle-row">
+
+        <div>
+          <strong>RPE</strong>
+          <small>Subjektive Belastung 0–10</small>
+        </div>
+
+        <input
+          type="checkbox"
+          id="includeRpe"
+        >
+
+      </label>
+
+
+      <label class="toggle-row">
+
+        <div>
+          <strong>Notizen / Besonderheiten</strong>
+          <small>Freies Feld am Ende des Trainingsbogens</small>
+        </div>
+
+        <input
+          type="checkbox"
+          id="includeNotes"
+          checked
+        >
+
+      </label>
+
+    </div>
+
+  </section>
+
+
+  <div class="plan-footer">
+
+    <button
+      class="continue-button"
+      id="createPreviewButton"
+    >
+      Vorschau erstellen →
+    </button>
+
+  </div>
+
+</main>
+
+<!-- PDF-VORSCHAU -->
+
+<main class="app-container view" id="previewView">
+
+  <button class="back-button" id="backToConfigButton">
+    ← PDF konfigurieren
+  </button>
+
+  <section class="hero">
+    <p class="eyebrow">Trainingsplan</p>
+    <h1>Vorschau</h1>
+    <p class="subtitle">
+      So wird der Trainings- und Belastungsbogen aufgebaut.
+    </p>
+  </section>
+
+  <div class="preview-wrapper">
+
+    <div class="pdf-sheet" id="pdfSheet">
+
+      <div class="pdf-header">
+        <div>
+          <h2>Trainings- und Belastungsprotokoll</h2>
+        </div>
+
+        <div class="pdf-header-fields">
+          <span>Schwerpunkt: __________________</span>
+        </div>
+      </div>
+
+      <div
+        class="training-table-wrapper"
+        id="trainingTableWrapper"
+      >
+      </div>
+
+      <div
+        class="general-monitoring"
+        id="generalMonitoring"
+      >
+      </div>
+
+      <div
+        class="pdf-notes"
+        id="pdfNotes"
+      >
+        <strong>Notizen / Besonderheiten</strong>
+
+        <div class="note-lines">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="plan-footer">
+
+    <button
+      class="continue-button"
+      id="printButton"
+    >
+      Drucken / als PDF speichern
+    </button>
+
+  </div>
+
+</main>
+
+<!-- ÜBUNGSBIBLIOTHEK -->
+
+<main class="app-container view" id="libraryView">
+
+  <button class="back-button" id="backFromLibraryButton">
+    ← Startseite
+  </button>
+
+  <section class="hero">
+    <p class="eyebrow">Physio Training</p>
+    <h1>Übungsbibliothek</h1>
+    <p class="subtitle">
+      Verwalte die Übungen, die dir bei der Trainingsplanerstellung zur Verfügung stehen.
+    </p>
+  </section>
+
+  <div class="library-toolbar">
+
+    <input
+      type="text"
+      id="librarySearch"
+      placeholder="Übung suchen ..."
+    >
+
+    <button
+      class="continue-button"
+      id="addExerciseButton"
+    >
+      ＋ Neue Übung
+    </button>
+
+  </div>
+
+
+  <section
+    class="library-list"
+    id="libraryList"
+  >
+  </section>
+
+
+  <!-- Formular für neue Übung -->
+
+  <section
+    class="exercise-form-card hidden"
+    id="exerciseForm"
+  >
+
+    <h2 id="exerciseFormTitle">Neue Übung</h2>
+
+    <div class="form-grid">
+
+      <div class="input-group">
+        <label>Übungsname *</label>
+
+        <input
+          type="text"
+          id="newExerciseName"
+          placeholder="z. B. Step-up"
+        >
+      </div>
+
+
+      <div class="input-group">
+        <label>Kategorie</label>
+
+        <select id="newExerciseCategory">
+          <option>Unterkörper</option>
+          <option>Oberkörper</option>
+          <option>Rumpf</option>
+          <option>Mobilität</option>
+          <option>Koordination</option>
+          <option>Ausdauer</option>
+          <option>Sonstiges</option>
+        </select>
+
+      </div>
+
+
+      <div class="input-group">
+        <label>Körperregion</label>
+
+        <input
+          type="text"
+          id="newExerciseRegion"
+          placeholder="optional"
+        >
+      </div>
+
+    </div>
+
+
+    <div class="input-group form-note">
+
+      <label>Notiz</label>
+
+      <textarea
+        id="newExerciseNote"
+        class="exercise-note"
+        placeholder="Optional"
+      ></textarea>
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        class="secondary-button"
+        id="cancelExerciseButton"
+      >
+        Abbrechen
+      </button>
+
+      <button
+        class="continue-button"
+        id="saveExerciseButton"
+      >
+        Übung speichern
+      </button>
+
+    </div>
+
+  </section>
+
+</main>
+<!-- GESPEICHERTE PLÄNE -->
+
+<main class="app-container view" id="savedPlansView">
+
+  <button class="back-button" id="backFromSavedPlansButton">
+    ← Startseite
+  </button>
+
+  <section class="hero">
+    <p class="eyebrow">Physio Training</p>
+    <h1>Gespeicherte Pläne</h1>
+    <p class="subtitle">
+      Öffne bereits erstellte Trainingspläne erneut.
+    </p>
+  </section>
+
+  <section
+    class="library-list"
+    id="savedPlansList"
+  >
+  </section>
+
+</main>
+
+  <script src="app.js"></script>
+</body>
+</html>
