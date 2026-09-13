@@ -2732,7 +2732,7 @@ let exerciseSyncRunning = false;
 
 
 // =====================================
-// EINDEUTIGE ID ERZEUGEN
+// EINDEUTIGE UUID ERZEUGEN
 // =====================================
 
 function createExerciseId() {
@@ -2748,12 +2748,88 @@ function createExerciseId() {
   }
 
 
+  // Fallback für Geräte ohne randomUUID().
+  // Erzeugt trotzdem eine gültige UUID.
+
+  const bytes =
+    new Uint8Array(16);
+
+  crypto.getRandomValues(bytes);
+
+  bytes[6] =
+    (bytes[6] & 0x0f) | 0x40;
+
+  bytes[8] =
+    (bytes[8] & 0x3f) | 0x80;
+
+
+  const hex =
+    Array.from(bytes).map(
+      function (byte) {
+
+        return byte
+          .toString(16)
+          .padStart(2, "0");
+
+      }
+    );
+
+
   return (
-    Date.now().toString(36) +
+    hex.slice(0, 4).join("") +
     "-" +
-    Math.random()
-      .toString(36)
-      .slice(2)
+    hex.slice(4, 6).join("") +
+    "-" +
+    hex.slice(6, 8).join("") +
+    "-" +
+    hex.slice(8, 10).join("") +
+    "-" +
+    hex.slice(10, 16).join("")
+  );
+
+}
+
+
+// =====================================
+// STANDARDÜBUNGEN ERKENNEN
+// =====================================
+
+const defaultExerciseNames =
+  new Set([
+    "beinpresse",
+    "kniebeuge",
+    "wadenheben",
+    "rudern",
+    "latzug",
+    "pallof press"
+  ]);
+
+
+function isOnlyDefaultExerciseLibrary() {
+
+  if (
+    exerciseLibrary.length !==
+      defaultExerciseNames.size
+  ) {
+
+    return false;
+
+  }
+
+
+  return exerciseLibrary.every(
+    function (exercise) {
+
+      const name =
+        (exercise.name || "")
+          .trim()
+          .toLowerCase();
+
+      return defaultExerciseNames.has(
+        name
+      );
+
+    }
   );
 
 }
@@ -2793,7 +2869,7 @@ function prepareLocalExerciseLibrary() {
 
       if (
         typeof exercise.favorite !==
-        "boolean"
+          "boolean"
       ) {
 
         exercise.favorite = false;
@@ -2860,7 +2936,9 @@ async function getCurrentSyncUser() {
       data,
       error
     } =
-      await supabaseClient.auth.getUser();
+      await supabaseClient
+        .auth
+        .getUser();
 
 
     if (error) {
@@ -2877,6 +2955,7 @@ async function getCurrentSyncUser() {
 
     return data.user || null;
 
+
   } catch (error) {
 
     console.warn(
@@ -2892,7 +2971,7 @@ async function getCurrentSyncUser() {
 
 
 // =====================================
-// LOKALE ÜBUNG → SUPABASE FORMAT
+// LOKALE ÜBUNG → SUPABASE
 // =====================================
 
 function exerciseToSupabase(
@@ -2940,7 +3019,7 @@ function exerciseToSupabase(
 
 
 // =====================================
-// SUPABASE ÜBUNG → LOKALES FORMAT
+// SUPABASE → LOKALE ÜBUNG
 // =====================================
 
 function exerciseFromSupabase(
@@ -2993,7 +3072,7 @@ async function syncExerciseToCloud(
 
   if (!user) {
 
-    return;
+    return false;
 
   }
 
@@ -3020,26 +3099,30 @@ async function syncExerciseToCloud(
           }
         );
 
-if (error) {
 
-  console.error(
-    "Übung konnte nicht synchronisiert werden:",
-    error
-  );
+    if (error) {
 
-  alert(
-    "Supabase-Fehler:\n\n" +
-    error.message
-  );
+      console.warn(
+        "Übung konnte aktuell nicht synchronisiert werden:",
+        error
+      );
 
-}
+      return false;
+
+    }
+
+
+    return true;
+
 
   } catch (error) {
 
-    console.error(
-      "Sync-Fehler:",
+    console.warn(
+      "Übung konnte aktuell nicht synchronisiert werden:",
       error
     );
+
+    return false;
 
   }
 
@@ -3047,10 +3130,47 @@ if (error) {
 
 
 // =====================================
-// ÜBUNG IN DER CLOUD LÖSCHMARKIEREN
+// AUSSTEHENDE LÖSCHUNGEN
 // =====================================
 
-async function syncDeletedExercise(
+function getPendingExerciseDeletions() {
+
+  try {
+
+    return (
+      JSON.parse(
+        localStorage.getItem(
+          "pendingExerciseDeletions"
+        )
+      ) || []
+    );
+
+  } catch (error) {
+
+    return [];
+
+  }
+
+}
+
+
+function savePendingExerciseDeletions(
+  deletions
+) {
+
+  localStorage.setItem(
+    "pendingExerciseDeletions",
+    JSON.stringify(deletions)
+  );
+
+}
+
+
+// =====================================
+// LÖSCHUNG VORMERKEN
+// =====================================
+
+function queueExerciseDeletion(
   exercise
 ) {
 
@@ -3061,18 +3181,88 @@ async function syncDeletedExercise(
   }
 
 
-  const user =
-    await getCurrentSyncUser();
+  const deletions =
+    getPendingExerciseDeletions();
 
 
-  if (!user) {
+  const now =
+    new Date().toISOString();
 
-    return;
+
+  const deletion = {
+    ...exercise,
+
+    updatedAt:
+      now,
+
+    deletedAt:
+      now
+  };
+
+
+  const existingIndex =
+    deletions.findIndex(
+      function (item) {
+
+        return (
+          item.id ===
+          deletion.id
+        );
+
+      }
+    );
+
+
+  if (existingIndex >= 0) {
+
+    deletions[existingIndex] =
+      deletion;
+
+  } else {
+
+    deletions.push(
+      deletion
+    );
 
   }
 
 
-  const now =
+  savePendingExerciseDeletions(
+    deletions
+  );
+
+
+  // Sofort versuchen.
+  // Falls offline, bleibt die Löschung
+  // einfach in localStorage gespeichert.
+
+  flushPendingExerciseDeletions();
+
+}
+
+
+// =====================================
+// CLOUD-LÖSCHUNG SENDEN
+// =====================================
+
+async function syncDeletedExercise(
+  exercise,
+  user
+) {
+
+  if (
+    !exercise?.id ||
+    !user
+  ) {
+
+    return false;
+
+  }
+
+
+  const deletedAt =
+    exercise.deletedAt ||
+    exercise.updatedAt ||
     new Date().toISOString();
 
 
@@ -3085,6 +3275,7 @@ async function syncDeletedExercise(
         .from("exercises")
         .upsert(
           {
+
             id:
               exercise.id,
 
@@ -3111,10 +3302,11 @@ async function syncDeletedExercise(
               exercise.favorite === true,
 
             updated_at:
-              now,
+              deletedAt,
 
             deleted_at:
-              now
+              deletedAt
+
           },
           {
             onConflict:
@@ -3123,21 +3315,33 @@ async function syncDeletedExercise(
         );
 
 
-    if (error) {
+if (error) {
 
-      console.error(
-        "Löschen konnte nicht synchronisiert werden:",
-        error
-      );
+  console.error(
+    "Löschen konnte nicht synchronisiert werden:",
+    error
+  );
 
-    }
+  alert(
+    "Supabase-Löschfehler:\n\n" +
+    error.message
+  );
+
+  return false;
+
+}
+
+    return true;
+
 
   } catch (error) {
 
-    console.error(
-      "Fehler beim Cloud-Löschen:",
+    console.warn(
+      "Cloud-Löschung aktuell nicht möglich:",
       error
     );
+
+    return false;
 
   }
 
@@ -3145,7 +3349,102 @@ async function syncDeletedExercise(
 
 
 // =====================================
-// KOMPLETTE BIBLIOTHEK SYNCHRONISIEREN
+// AUSSTEHENDE LÖSCHUNGEN SENDEN
+// =====================================
+
+async function flushPendingExerciseDeletions(
+  existingUser = null
+) {
+
+  const deletions =
+    getPendingExerciseDeletions();
+
+
+  if (
+    deletions.length === 0
+  ) {
+
+    console.log(
+      "Keine offenen Löschungen vorhanden."
+    );
+
+    return;
+
+  }
+
+
+  console.log(
+    "Offene Löschungen:",
+    deletions
+  );
+
+
+  const user =
+    existingUser ||
+    await getCurrentSyncUser();
+
+
+  if (!user) {
+
+    alert(
+      "Lösch-Sync: Kein angemeldeter Benutzer gefunden."
+    );
+
+    return;
+
+  }
+
+
+  const remaining = [];
+
+
+  for (
+    const deletion
+    of deletions
+  ) {
+
+    const success =
+      await syncDeletedExercise(
+        deletion,
+        user
+      );
+
+
+    if (success) {
+
+      alert(
+        'Löschung synchronisiert: "' +
+        deletion.name +
+        '"'
+      );
+
+    } else {
+
+      alert(
+        'Löschung NICHT synchronisiert: "' +
+        deletion.name +
+        '"'
+      );
+
+      remaining.push(
+        deletion
+      );
+
+    }
+
+  }
+
+
+  savePendingExerciseDeletions(
+    remaining
+  );
+
+}
+
+
+// =====================================
+// KOMPLETTE BIBLIOTHEK
+// SYNCHRONISIEREN
 // =====================================
 
 async function syncExerciseLibrary() {
@@ -3176,6 +3475,14 @@ async function syncExerciseLibrary() {
     prepareLocalExerciseLibrary();
 
 
+    // Erst eventuell noch offene
+    // Löschungen übertragen.
+
+    await flushPendingExerciseDeletions(
+      user
+    );
+
+
     // =================================
     // CLOUD-DATEN LADEN
     // =================================
@@ -3193,30 +3500,104 @@ async function syncExerciseLibrary() {
         );
 
 
-if (error) {
+    if (error) {
 
-  console.error(
-    "Übungsbibliothek konnte nicht geladen werden:",
-    error
-  );
+      console.warn(
+        "Übungsbibliothek konnte aktuell nicht geladen werden:",
+        error
+      );
 
-  alert(
-    "Supabase-Ladefehler:\n\n" +
-    error.message
-  );
+      return;
 
-  return;
+    }
 
-}
 
+    const allCloudExercises =
+      cloudExercises || [];
+
+
+    const activeCloudExercises =
+      allCloudExercises.filter(
+        function (exercise) {
+
+          return !exercise.deleted_at;
+
+        }
+      );
+
+
+    // =================================
+    // ERSTER SYNC AUF NEUEM GERÄT
+    // =================================
+
+    const syncInitKey =
+      "exerciseSyncInitialized_" +
+      user.id;
+
+
+    const hasSyncedBefore =
+      localStorage.getItem(
+        syncInitKey
+      ) === "true";
+
+
+    // Ein neues Gerät besitzt zunächst
+    // automatisch unsere sechs
+    // Standardübungen mit neuen IDs.
+    //
+    // Gibt es bereits Cloud-Daten,
+    // werden stattdessen diese geladen.
+    // Dadurch entstehen keine Duplikate.
+
+    if (
+      !hasSyncedBefore &&
+      activeCloudExercises.length > 0 &&
+      isOnlyDefaultExerciseLibrary()
+    ) {
+
+      exerciseLibrary =
+        activeCloudExercises.map(
+          exerciseFromSupabase
+        );
+
+
+      saveExerciseLibrary();
+
+
+      localStorage.setItem(
+        syncInitKey,
+        "true"
+      );
+
+
+      renderLibrary(
+        librarySearch?.value || "",
+        typeof showLibraryFavoritesOnly !==
+          "undefined"
+          ? showLibraryFavoritesOnly
+          : false
+      );
+
+
+      console.log(
+        "Übungsbibliothek vom bestehenden Konto geladen."
+      );
+
+
+      return;
+
+    }
+
+
+    // =================================
+    // NORMALER ABGLEICH
+    // =================================
 
     const cloudById =
       new Map();
 
 
-    (
-      cloudExercises || []
-    ).forEach(
+    allCloudExercises.forEach(
       function (exercise) {
 
         cloudById.set(
@@ -3231,10 +3612,6 @@ if (error) {
     const mergedExercises = [];
 
 
-    // =================================
-    // LOKALE ÜBUNGEN VERGLEICHEN
-    // =================================
-
     for (
       const localExercise
       of exerciseLibrary
@@ -3246,12 +3623,15 @@ if (error) {
         );
 
 
-      // Noch nicht in Supabase
+      // Lokal vorhanden,
+      // in Cloud noch nicht.
+
       if (!cloudExercise) {
 
         await syncExerciseToCloud(
           localExercise
         );
+
 
         mergedExercises.push(
           localExercise
@@ -3281,7 +3661,9 @@ if (error) {
         ).getTime();
 
 
-      // Cloud-Löschung ist neuer
+      // Cloud-Löschung ist mindestens
+      // so neu wie die lokale Version.
+
       if (
         cloudExercise.deleted_at &&
         cloudTime >= localTime
@@ -3292,7 +3674,8 @@ if (error) {
       }
 
 
-      // Lokal ist neuer
+      // Lokal ist neuer.
+
       if (
         localTime >
         cloudTime
@@ -3302,13 +3685,15 @@ if (error) {
           localExercise
         );
 
+
         mergedExercises.push(
           localExercise
         );
 
       } else {
 
-        // Cloud ist neuer oder gleich
+        // Cloud ist neuer oder gleich.
+
         if (
           !cloudExercise.deleted_at
         ) {
@@ -3327,7 +3712,7 @@ if (error) {
 
 
     // =================================
-    // ÜBUNGEN, DIE NUR IN CLOUD EXISTIEREN
+    // NUR IN CLOUD VORHANDENE ÜBUNGEN
     // =================================
 
     cloudById.forEach(
@@ -3353,7 +3738,7 @@ if (error) {
 
 
     // =================================
-    // LOKALE BIBLIOTHEK AKTUALISIEREN
+    // LOKALE BIBLIOTHEK SPEICHERN
     // =================================
 
     exerciseLibrary =
@@ -3361,6 +3746,12 @@ if (error) {
 
 
     saveExerciseLibrary();
+
+
+    localStorage.setItem(
+      syncInitKey,
+      "true"
+    );
 
 
     renderLibrary(
@@ -3374,7 +3765,7 @@ if (error) {
 
     if (
       typeof renderExerciseSelection ===
-      "function"
+        "function"
     ) {
 
       renderExerciseSelection();
@@ -3389,10 +3780,11 @@ if (error) {
 
   } catch (error) {
 
-    console.error(
-      "Synchronisation fehlgeschlagen:",
+    console.warn(
+      "Synchronisation aktuell nicht möglich:",
       error
     );
+
 
   } finally {
 
@@ -3401,6 +3793,7 @@ if (error) {
   }
 
 }
+
 
 prepareLocalExerciseLibrary();
 
@@ -4228,25 +4621,18 @@ libraryList.addEventListener(
         return;
       }
 
-      const deletedExercise = {
-  ...exercise,
-  updatedAt:
-    new Date().toISOString()
-};
-
-      exerciseLibrary.splice(
-        index,
-        1
-      );
-
-
-      saveExerciseLibrary();
-
-syncDeletedExercise(
-  deletedExercise
+queueExerciseDeletion(
+  exercise
 );
 
-    renderLibrary(
+exerciseLibrary.splice(
+  index,
+  1
+);
+
+saveExerciseLibrary();
+
+renderLibrary(
   librarySearch.value,
   showLibraryFavoritesOnly
 );
