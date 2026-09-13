@@ -208,10 +208,21 @@ async function loadCurrentSession() {
     user
   );
 
+if (user) {
+
+  setTimeout(
+    function () {
+
+      syncExerciseLibrary();
+
+    },
+    0
+  );
+
 }
 
+}
 
-loadCurrentSession();
 
 
 // =====================================
@@ -430,6 +441,15 @@ supabaseClient
       updateAccountView(
         user
       );
+
+
+      // Wenn jemand angemeldet ist:
+      // Übungsbibliothek mit Supabase abgleichen
+      if (user) {
+
+        syncExerciseLibrary();
+
+      }
 
     }
   );
@@ -2705,6 +2725,688 @@ function saveExerciseLibrary() {
 }
 
 // =====================================
+// ÜBUNGSBIBLIOTHEK – SUPABASE SYNC
+// =====================================
+
+let exerciseSyncRunning = false;
+
+
+// =====================================
+// EINDEUTIGE ID ERZEUGEN
+// =====================================
+
+function createExerciseId() {
+
+  if (
+    window.crypto &&
+    typeof window.crypto.randomUUID ===
+      "function"
+  ) {
+
+    return crypto.randomUUID();
+
+  }
+
+
+  return (
+    Date.now().toString(36) +
+    "-" +
+    Math.random()
+      .toString(36)
+      .slice(2)
+  );
+
+}
+
+
+// =====================================
+// LOKALE ÜBUNGEN VORBEREITEN
+// =====================================
+
+function prepareLocalExerciseLibrary() {
+
+  let changed = false;
+
+
+  exerciseLibrary.forEach(
+    function (exercise) {
+
+      if (!exercise.id) {
+
+        exercise.id =
+          createExerciseId();
+
+        changed = true;
+
+      }
+
+
+      if (!exercise.updatedAt) {
+
+        exercise.updatedAt =
+          new Date().toISOString();
+
+        changed = true;
+
+      }
+
+
+      if (
+        typeof exercise.favorite !==
+        "boolean"
+      ) {
+
+        exercise.favorite = false;
+
+        changed = true;
+
+      }
+
+
+      if (
+        exercise.region === undefined
+      ) {
+
+        exercise.region = "";
+
+        changed = true;
+
+      }
+
+
+      if (
+        exercise.equipment === undefined
+      ) {
+
+        exercise.equipment = "";
+
+        changed = true;
+
+      }
+
+
+      if (
+        exercise.note === undefined
+      ) {
+
+        exercise.note = "";
+
+        changed = true;
+
+      }
+
+    }
+  );
+
+
+  if (changed) {
+
+    saveExerciseLibrary();
+
+  }
+
+}
+
+
+// =====================================
+// AKTUELLEN BENUTZER HOLEN
+// =====================================
+
+async function getCurrentSyncUser() {
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth.getUser();
+
+
+    if (error) {
+
+      console.warn(
+        "Benutzer konnte nicht geladen werden:",
+        error
+      );
+
+      return null;
+
+    }
+
+
+    return data.user || null;
+
+  } catch (error) {
+
+    console.warn(
+      "Benutzerabfrage fehlgeschlagen:",
+      error
+    );
+
+    return null;
+
+  }
+
+}
+
+
+// =====================================
+// LOKALE ÜBUNG → SUPABASE FORMAT
+// =====================================
+
+function exerciseToSupabase(
+  exercise,
+  userId
+) {
+
+  return {
+
+    id:
+      exercise.id,
+
+    user_id:
+      userId,
+
+    name:
+      exercise.name || "",
+
+    category:
+      exercise.category ||
+      "Sonstiges",
+
+    region:
+      exercise.region || "",
+
+    equipment:
+      exercise.equipment || "",
+
+    note:
+      exercise.note || "",
+
+    favorite:
+      exercise.favorite === true,
+
+    updated_at:
+      exercise.updatedAt ||
+      new Date().toISOString(),
+
+    deleted_at:
+      null
+
+  };
+
+}
+
+
+// =====================================
+// SUPABASE ÜBUNG → LOKALES FORMAT
+// =====================================
+
+function exerciseFromSupabase(
+  exercise
+) {
+
+  return {
+
+    id:
+      exercise.id,
+
+    name:
+      exercise.name || "",
+
+    category:
+      exercise.category ||
+      "Sonstiges",
+
+    region:
+      exercise.region || "",
+
+    equipment:
+      exercise.equipment || "",
+
+    note:
+      exercise.note || "",
+
+    favorite:
+      exercise.favorite === true,
+
+    updatedAt:
+      exercise.updated_at
+
+  };
+
+}
+
+
+// =====================================
+// EINZELNE ÜBUNG HOCHLADEN
+// =====================================
+
+async function syncExerciseToCloud(
+  exercise
+) {
+
+  const user =
+    await getCurrentSyncUser();
+
+
+  if (!user) {
+
+    return;
+
+  }
+
+
+  try {
+
+    const cloudExercise =
+      exerciseToSupabase(
+        exercise,
+        user.id
+      );
+
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("exercises")
+        .upsert(
+          cloudExercise,
+          {
+            onConflict:
+              "id"
+          }
+        );
+
+if (error) {
+
+  console.error(
+    "Übung konnte nicht synchronisiert werden:",
+    error
+  );
+
+  alert(
+    "Supabase-Fehler:\n\n" +
+    error.message
+  );
+
+}
+
+  } catch (error) {
+
+    console.error(
+      "Sync-Fehler:",
+      error
+    );
+
+  }
+
+}
+
+
+// =====================================
+// ÜBUNG IN DER CLOUD LÖSCHMARKIEREN
+// =====================================
+
+async function syncDeletedExercise(
+  exercise
+) {
+
+  if (!exercise?.id) {
+
+    return;
+
+  }
+
+
+  const user =
+    await getCurrentSyncUser();
+
+
+  if (!user) {
+
+    return;
+
+  }
+
+
+  const now =
+    new Date().toISOString();
+
+
+  try {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("exercises")
+        .upsert(
+          {
+            id:
+              exercise.id,
+
+            user_id:
+              user.id,
+
+            name:
+              exercise.name || "",
+
+            category:
+              exercise.category ||
+              "Sonstiges",
+
+            region:
+              exercise.region || "",
+
+            equipment:
+              exercise.equipment || "",
+
+            note:
+              exercise.note || "",
+
+            favorite:
+              exercise.favorite === true,
+
+            updated_at:
+              now,
+
+            deleted_at:
+              now
+          },
+          {
+            onConflict:
+              "id"
+          }
+        );
+
+
+    if (error) {
+
+      console.error(
+        "Löschen konnte nicht synchronisiert werden:",
+        error
+      );
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Fehler beim Cloud-Löschen:",
+      error
+    );
+
+  }
+
+}
+
+
+// =====================================
+// KOMPLETTE BIBLIOTHEK SYNCHRONISIEREN
+// =====================================
+
+async function syncExerciseLibrary() {
+
+  if (exerciseSyncRunning) {
+
+    return;
+
+  }
+
+
+  const user =
+    await getCurrentSyncUser();
+
+
+  if (!user) {
+
+    return;
+
+  }
+
+
+  exerciseSyncRunning = true;
+
+
+  try {
+
+    prepareLocalExerciseLibrary();
+
+
+    // =================================
+    // CLOUD-DATEN LADEN
+    // =================================
+
+    const {
+      data: cloudExercises,
+      error
+    } =
+      await supabaseClient
+        .from("exercises")
+        .select("*")
+        .eq(
+          "user_id",
+          user.id
+        );
+
+
+if (error) {
+
+  console.error(
+    "Übungsbibliothek konnte nicht geladen werden:",
+    error
+  );
+
+  alert(
+    "Supabase-Ladefehler:\n\n" +
+    error.message
+  );
+
+  return;
+
+}
+
+
+    const cloudById =
+      new Map();
+
+
+    (
+      cloudExercises || []
+    ).forEach(
+      function (exercise) {
+
+        cloudById.set(
+          exercise.id,
+          exercise
+        );
+
+      }
+    );
+
+
+    const mergedExercises = [];
+
+
+    // =================================
+    // LOKALE ÜBUNGEN VERGLEICHEN
+    // =================================
+
+    for (
+      const localExercise
+      of exerciseLibrary
+    ) {
+
+      const cloudExercise =
+        cloudById.get(
+          localExercise.id
+        );
+
+
+      // Noch nicht in Supabase
+      if (!cloudExercise) {
+
+        await syncExerciseToCloud(
+          localExercise
+        );
+
+        mergedExercises.push(
+          localExercise
+        );
+
+        continue;
+
+      }
+
+
+      cloudById.delete(
+        localExercise.id
+      );
+
+
+      const localTime =
+        new Date(
+          localExercise.updatedAt ||
+          0
+        ).getTime();
+
+
+      const cloudTime =
+        new Date(
+          cloudExercise.updated_at ||
+          0
+        ).getTime();
+
+
+      // Cloud-Löschung ist neuer
+      if (
+        cloudExercise.deleted_at &&
+        cloudTime >= localTime
+      ) {
+
+        continue;
+
+      }
+
+
+      // Lokal ist neuer
+      if (
+        localTime >
+        cloudTime
+      ) {
+
+        await syncExerciseToCloud(
+          localExercise
+        );
+
+        mergedExercises.push(
+          localExercise
+        );
+
+      } else {
+
+        // Cloud ist neuer oder gleich
+        if (
+          !cloudExercise.deleted_at
+        ) {
+
+          mergedExercises.push(
+            exerciseFromSupabase(
+              cloudExercise
+            )
+          );
+
+        }
+
+      }
+
+    }
+
+
+    // =================================
+    // ÜBUNGEN, DIE NUR IN CLOUD EXISTIEREN
+    // =================================
+
+    cloudById.forEach(
+      function (cloudExercise) {
+
+        if (
+          cloudExercise.deleted_at
+        ) {
+
+          return;
+
+        }
+
+
+        mergedExercises.push(
+          exerciseFromSupabase(
+            cloudExercise
+          )
+        );
+
+      }
+    );
+
+
+    // =================================
+    // LOKALE BIBLIOTHEK AKTUALISIEREN
+    // =================================
+
+    exerciseLibrary =
+      mergedExercises;
+
+
+    saveExerciseLibrary();
+
+
+    renderLibrary(
+      librarySearch?.value || "",
+      typeof showLibraryFavoritesOnly !==
+        "undefined"
+        ? showLibraryFavoritesOnly
+        : false
+    );
+
+
+    if (
+      typeof renderExerciseSelection ===
+      "function"
+    ) {
+
+      renderExerciseSelection();
+
+    }
+
+
+    console.log(
+      "Übungsbibliothek synchronisiert."
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Synchronisation fehlgeschlagen:",
+      error
+    );
+
+  } finally {
+
+    exerciseSyncRunning = false;
+
+  }
+
+}
+
+prepareLocalExerciseLibrary();
+
+loadCurrentSession();
+
+// =====================================
 // ÜBUNGSBIBLIOTHEK ANZEIGEN
 // =====================================
 
@@ -2898,6 +3600,8 @@ libraryList.addEventListener(
     exercise.favorite =
       exercise.favorite !== true;
 
+      exercise.updatedAt =
+  new Date().toISOString();
 
     localStorage.setItem(
       "exerciseLibrary",
@@ -2906,6 +3610,9 @@ libraryList.addEventListener(
       )
     );
 
+    syncExerciseToCloud(
+  exercise
+);
 
     if (exercise.favorite) {
 
@@ -3316,14 +4023,40 @@ const existingFavorite =
   ]?.favorite === true;
 
 
+const existingExercise =
+  editExerciseIndex !== null
+    ? exerciseLibrary[
+        editExerciseIndex
+      ]
+    : null;
+
+
 const exerciseData = {
 
-  name: name,
-  category: category,
-  region: region,
-  equipment: equipment,
-  note: note,
-  favorite: existingFavorite
+  id:
+    existingExercise?.id ||
+    createExerciseId(),
+
+  name:
+    name,
+
+  category:
+    category,
+
+  region:
+    region,
+
+  equipment:
+    equipment,
+
+  note:
+    note,
+
+  favorite:
+    existingFavorite,
+
+  updatedAt:
+    new Date().toISOString()
 
 };
 
@@ -3342,9 +4075,16 @@ if (editExerciseIndex === null) {
 
 }
 
-    saveExerciseLibrary();
+saveExerciseLibrary();
 
-    renderLibrary();
+renderLibrary(
+  librarySearch.value,
+  showLibraryFavoritesOnly
+);
+
+syncExerciseToCloud(
+  exerciseData
+);
 
 
     document
@@ -3488,6 +4228,11 @@ libraryList.addEventListener(
         return;
       }
 
+      const deletedExercise = {
+  ...exercise,
+  updatedAt:
+    new Date().toISOString()
+};
 
       exerciseLibrary.splice(
         index,
@@ -3497,9 +4242,14 @@ libraryList.addEventListener(
 
       saveExerciseLibrary();
 
-      renderLibrary(
-        librarySearch.value
-      );
+syncDeletedExercise(
+  deletedExercise
+);
+
+    renderLibrary(
+  librarySearch.value,
+  showLibraryFavoritesOnly
+);
 
     }
 
