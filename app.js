@@ -1339,10 +1339,6 @@ const savedPlansList =
 const savePlanButton =
   document.getElementById("savePlanButton");
 
-  const homeFromPlanButton =
-  document.getElementById(
-    "homeFromPlanButton"
-  );
 
   let savedPlans =
   JSON.parse(
@@ -1429,11 +1425,7 @@ if (currentPlanId === null) {
 
 }
 
-    savePlansToStorage();
-
-    homeFromPlanButton.classList.remove(
-  "hidden"
-);
+    savePlansToStorage()
 
     currentPlanId = null;
 
@@ -1749,46 +1741,165 @@ savedPlansList.addEventListener(
 
   }
 );
-homeFromPlanButton.addEventListener(
-  "click",
-  function () {
 
-    planView.classList.remove(
-      "active-view"
-    );
+// =====================================
+// SERVICE WORKER
+// =====================================
 
-    homeView.classList.add(
-      "active-view"
-    );
-
-    homeFromPlanButton.classList.add(
-      "hidden"
-    );
-
-    localStorage.removeItem(
-      "temporaryPlanData"
-    );
-
-    currentPlanId = null;
-
-    savePlanButton.textContent =
-      "Plan speichern";
-
-    window.scrollTo(0, 0);
-
-  }
-);
 if ("serviceWorker" in navigator) {
 
   window.addEventListener(
     "load",
-    function () {
+    async function () {
 
-      navigator.serviceWorker.register(
-        "./service-worker.js"
-      );
+      try {
+
+        const registration =
+          await navigator
+            .serviceWorker
+            .register(
+              "./service-worker.js"
+            );
+
+
+        // Prüft beim Öffnen der App,
+        // ob eine neue Version vorhanden ist
+        registration.update();
+
+
+        console.log(
+          "Service Worker aktiv."
+        );
+
+      } catch (error) {
+
+        console.error(
+          "Service Worker konnte nicht geladen werden:",
+          error
+        );
+
+      }
 
     }
   );
 
 }
+// =====================================
+// EINHEITLICHE NAVIGATION
+// =====================================
+
+function setupGlobalNavigation() {
+
+  const allViews =
+    document.querySelectorAll(".view");
+
+
+  allViews.forEach(function (view) {
+
+    // Die Startseite braucht keine Navigation
+    if (view.id === "homeView") {
+      return;
+    }
+
+
+    // Verhindert doppelte Navigation
+    if (
+      view.querySelector(".navigation-bar")
+    ) {
+      return;
+    }
+
+
+    const navigationBar =
+      document.createElement("div");
+
+    navigationBar.className =
+      "navigation-bar";
+
+
+    // Vorhandenen Zurück-Button suchen
+    const existingBackButton =
+      view.querySelector(".back-button");
+
+
+    // Neue Startseiten-Schaltfläche
+    const homeButton =
+      document.createElement("button");
+
+    homeButton.className =
+      "home-button";
+
+    homeButton.type =
+      "button";
+
+    homeButton.innerHTML =
+      "⌂ Startseite";
+
+
+    // Navigationsleiste ganz oben einsetzen
+    view.insertBefore(
+      navigationBar,
+      view.firstChild
+    );
+
+
+    // Vorhandenen Zurück-Button hineinverschieben
+    if (existingBackButton) {
+
+      navigationBar.appendChild(
+        existingBackButton
+      );
+
+    } else {
+
+      // Falls eine spätere Seite keinen
+      // Zurück-Button besitzt
+      const placeholder =
+        document.createElement("div");
+
+      navigationBar.appendChild(
+        placeholder
+      );
+
+    }
+
+
+    navigationBar.appendChild(
+      homeButton
+    );
+
+
+    homeButton.addEventListener(
+      "click",
+      function () {
+
+        allViews.forEach(
+          function (otherView) {
+
+            otherView.classList.remove(
+              "active-view"
+            );
+
+          }
+        );
+
+
+        homeView.classList.add(
+          "active-view"
+        );
+
+
+        window.scrollTo(
+          0,
+          0
+        );
+
+      }
+    );
+
+  });
+
+}
+
+
+setupGlobalNavigation();

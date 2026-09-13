@@ -1004,6 +1004,55 @@ gap: 10px;
 .delete-button:hover {
   background: #fff5f5;
 }
+
+/* ============================= */
+/* EINHEITLICHE NAVIGATION       */
+/* ============================= */
+
+.navigation-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.navigation-bar .back-button {
+  margin: 0;
+}
+
+.home-button {
+  border: 1px solid #d7e3e2;
+  background: white;
+  color: #256f6c;
+
+  padding: 10px 16px;
+
+  border-radius: 10px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.home-button:hover {
+  background: #f2f8f7;
+}
+
+@media (max-width: 600px) {
+
+  .navigation-bar {
+    margin-bottom: 18px;
+  }
+
+  .home-button {
+    padding: 9px 12px;
+    font-size: 14px;
+  }
+
+}
+
 @media print {
 
   @page {
