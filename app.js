@@ -3765,6 +3765,22 @@ async function syncExerciseLibrary() {
 
 }
 
+// =====================================
+// INTERNETVERBINDUNG WIEDERHERGESTELLT
+// =====================================
+
+window.addEventListener(
+  "online",
+  function () {
+
+    console.log(
+      "Internet wieder verfügbar – Synchronisation wird gestartet."
+    );
+
+    syncExerciseLibrary();
+
+  }
+);
 
 prepareLocalExerciseLibrary();
 
