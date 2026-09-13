@@ -443,14 +443,6 @@ supabaseClient
       );
 
 
-      // Wenn jemand angemeldet ist:
-      // Übungsbibliothek mit Supabase abgleichen
-      if (user) {
-
-        syncExerciseLibrary();
-
-      }
-
     }
   );
 
@@ -3241,12 +3233,6 @@ function queueExerciseDeletion(
   );
 
 
-  // Sofort versuchen.
-  // Falls offline, bleibt die Löschung
-  // einfach in localStorage gespeichert.
-
-  flushPendingExerciseDeletions();
-
 }
 
 
@@ -3326,14 +3312,9 @@ async function syncDeletedExercise(
 
 if (error) {
 
-  console.error(
-    "Löschen konnte nicht synchronisiert werden:",
+  console.warn(
+    "Löschen konnte aktuell nicht synchronisiert werden:",
     error
-  );
-
-  alert(
-    "Supabase-Löschfehler:\n\n" +
-    error.message
   );
 
   return false;
@@ -3414,27 +3395,13 @@ if (!user) {
       );
 
 
-    if (success) {
+ if (!success) {
 
-      alert(
-        'Löschung synchronisiert: "' +
-        deletion.name +
-        '"'
-      );
+  remaining.push(
+    deletion
+  );
 
-    } else {
-
-      alert(
-        'Löschung NICHT synchronisiert: "' +
-        deletion.name +
-        '"'
-      );
-
-      remaining.push(
-        deletion
-      );
-
-    }
+}
 
   }
 

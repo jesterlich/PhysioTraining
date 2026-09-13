@@ -1,4 +1,4 @@
-const CACHE_NAME = "physio-training-v5";
+const CACHE_NAME = "physio-training-v6";
 
 const FILES_TO_CACHE = [
   "./",
