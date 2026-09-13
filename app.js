@@ -2923,7 +2923,6 @@ function prepareLocalExerciseLibrary() {
 
 }
 
-
 // =====================================
 // AKTUELLEN BENUTZER HOLEN
 // =====================================
@@ -2938,13 +2937,13 @@ async function getCurrentSyncUser() {
     } =
       await supabaseClient
         .auth
-        .getUser();
+        .getSession();
 
 
     if (error) {
 
       console.warn(
-        "Benutzer konnte nicht geladen werden:",
+        "Session konnte nicht geladen werden:",
         error
       );
 
@@ -2953,13 +2952,23 @@ async function getCurrentSyncUser() {
     }
 
 
-    return data.user || null;
+    if (
+      !data.session ||
+      !data.session.user
+    ) {
+
+      return null;
+
+    }
+
+
+    return data.session.user;
 
 
   } catch (error) {
 
     console.warn(
-      "Benutzerabfrage fehlgeschlagen:",
+      "Session-Abfrage fehlgeschlagen:",
       error
     );
 
@@ -3383,16 +3392,11 @@ async function flushPendingExerciseDeletions(
     existingUser ||
     await getCurrentSyncUser();
 
+if (!user) {
 
-  if (!user) {
+  return;
 
-    alert(
-      "Lösch-Sync: Kein angemeldeter Benutzer gefunden."
-    );
-
-    return;
-
-  }
+}
 
 
   const remaining = [];
