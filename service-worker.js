@@ -1,4 +1,4 @@
-const CACHE_NAME = "physio-training-v2";
+const CACHE_NAME = "physio-training-v3";
 
 const FILES_TO_CACHE = [
   "./",
@@ -6,8 +6,12 @@ const FILES_TO_CACHE = [
   "./style.css",
   "./app.js",
   "./manifest.json",
+
   "./icons/icon-192.png",
-  "./icons/icon-512.png"
+  "./icons/icon-512.png",
+
+  "./vendor/jspdf.umd.min.js",
+  "./vendor/jspdf.plugin.autotable.min.js"
 ];
 
 

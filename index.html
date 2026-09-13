@@ -36,6 +36,36 @@
       </p>
     </section>
 
+<div
+  class="draft-card hidden"
+  id="draftCard"
+>
+  <div class="draft-card-text">
+    <strong>Entwurf fortsetzen</strong>
+    <small id="draftCardInfo">
+      Ungespeicherter Trainingsplan
+    </small>
+  </div>
+
+  <div class="draft-card-actions">
+    <button
+      class="secondary-button"
+      id="continueDraftButton"
+      type="button"
+    >
+      Fortsetzen
+    </button>
+
+    <button
+      class="secondary-button"
+      id="discardDraftButton"
+      type="button"
+    >
+      Verwerfen
+    </button>
+  </div>
+</div>
+
     <section class="menu-grid">
 
       <button class="menu-card primary" id="newPlanButton">
@@ -99,12 +129,51 @@
     </div>
 
     <div class="filter-row">
-      <button class="filter-button active-filter">Alle</button>
-      <button class="filter-button">Unterkörper</button>
-      <button class="filter-button">Oberkörper</button>
-      <button class="filter-button">Rumpf</button>
-      <button class="filter-button">Mobilität</button>
-    </div>
+
+  <button
+    class="filter-button active-filter"
+    data-category="Alle"
+  >
+    Alle
+  </button>
+
+  <button
+    class="filter-button"
+    data-category="Unterkörper"
+  >
+    Unterkörper
+  </button>
+
+  <button
+    class="filter-button"
+    data-category="Oberkörper"
+  >
+    Oberkörper
+  </button>
+
+  <button
+    class="filter-button"
+    data-category="Rumpf"
+  >
+    Rumpf
+  </button>
+
+  <button
+    class="filter-button"
+    data-category="Mobilität"
+  >
+    Mobilität
+  </button>
+
+  <button
+    class="filter-button favorite-filter-button"
+    id="favoriteFilterButton"
+    type="button"
+  >
+    ★ Favoriten
+  </button>
+
+</div>
 
     <section class="exercise-list">
 
@@ -153,12 +222,27 @@
 
   </section>
 
+  <div class="plan-settings">
 
-  <section
-    class="plan-exercises"
-    id="planExercises"
-  >
-  </section>
+  <div class="input-group">
+    <label for="planNameInput">
+      Name des Trainingsplans
+    </label>
+
+    <input
+      type="text"
+      id="planNameInput"
+      placeholder="z. B. Knie – Kraftaufbau"
+    >
+  </div>
+
+</div>
+
+<section
+  class="plan-exercises"
+  id="planExercises"
+>
+</section>
 
 <div class="plan-footer">
 
@@ -168,6 +252,13 @@
   >
     Plan speichern
   </button>
+
+  <button
+  class="secondary-button"
+  id="duplicatePlanButton"
+>
+  Plan duplizieren
+</button>
 
   <button
     class="continue-button"
@@ -335,33 +426,73 @@
 
 <!-- PDF-VORSCHAU -->
 
-<main class="app-container view" id="previewView">
+<main
+  class="app-container view"
+  id="previewView"
+>
 
-  <button class="back-button" id="backToConfigButton">
+  <button
+    class="back-button"
+    id="backToConfigButton"
+  >
     ← PDF konfigurieren
   </button>
 
+
   <section class="hero">
-    <p class="eyebrow">Trainingsplan</p>
+
+    <p class="eyebrow">
+      Trainingsplan
+    </p>
+
     <h1>Vorschau</h1>
+
     <p class="subtitle">
       So wird der Trainings- und Belastungsbogen aufgebaut.
     </p>
+
   </section>
+
 
   <div class="preview-wrapper">
 
-    <div class="pdf-sheet" id="pdfSheet">
+    <div
+      class="pdf-sheet"
+      id="pdfSheet"
+    >
 
       <div class="pdf-header">
+
         <div>
-          <h2>Trainings- und Belastungsprotokoll</h2>
+
+          <div class="pdf-header-label">
+            PHYSIO TRAINING
+          </div>
+
+          <h2>
+            Trainings- und Belastungsprotokoll
+          </h2>
+
+          <div
+            class="pdf-plan-name"
+            id="pdfPlanName"
+          >
+          </div>
+
         </div>
 
+
         <div class="pdf-header-fields">
-          <span>Schwerpunkt: __________________</span>
+
+          <span>
+            Zeitraum:
+            __________________
+          </span>
+
         </div>
+
       </div>
+
 
       <div
         class="training-table-wrapper"
@@ -369,40 +500,70 @@
       >
       </div>
 
+
       <div
         class="general-monitoring"
         id="generalMonitoring"
       >
       </div>
 
+
       <div
         class="pdf-notes"
         id="pdfNotes"
       >
-        <strong>Notizen / Besonderheiten</strong>
+
+        <strong>
+          Notizen / Besonderheiten
+        </strong>
 
         <div class="note-lines">
           <div></div>
           <div></div>
           <div></div>
         </div>
+
       </div>
 
     </div>
 
   </div>
 
+<div class="pdf-actions">
 
-  <div class="plan-footer">
+  <button
+    class="secondary-button"
+    id="backToPdfConfigButton"
+    type="button"
+  >
+    Layout anpassen
+  </button>
 
-    <button
-      class="continue-button"
-      id="printButton"
-    >
-      Drucken / als PDF speichern
-    </button>
+  <button
+    class="secondary-button"
+    id="savePdfButton"
+    type="button"
+  >
+    ↓ PDF speichern
+  </button>
 
-  </div>
+  <button
+    class="continue-button"
+    id="sharePdfButton"
+    type="button"
+  >
+    📤 PDF teilen
+  </button>
+
+  <button
+    class="secondary-button"
+    id="printButton"
+    type="button"
+  >
+    Drucken
+  </button>
+
+</div>
 
 </main>
 
@@ -422,22 +583,30 @@
     </p>
   </section>
 
-  <div class="library-toolbar">
+ <div class="library-toolbar">
 
-    <input
-      type="text"
-      id="librarySearch"
-      placeholder="Übung suchen ..."
-    >
+  <input
+    type="text"
+    id="librarySearch"
+    placeholder="Übung suchen ..."
+  >
 
-    <button
-      class="continue-button"
-      id="addExerciseButton"
-    >
-      ＋ Neue Übung
-    </button>
+  <button
+    type="button"
+    class="filter-button"
+    id="libraryFavoriteFilterButton"
+  >
+    ★ Favoriten
+  </button>
 
-  </div>
+  <button
+    class="continue-button"
+    id="addExerciseButton"
+  >
+    ＋ Neue Übung
+  </button>
+
+</div>
 
 
   <section
@@ -446,90 +615,99 @@
   >
   </section>
 
+<!-- Formular für neue Übung -->
 
-  <!-- Formular für neue Übung -->
+<section
+  class="exercise-form-card hidden"
+  id="exerciseForm"
+>
 
-  <section
-    class="exercise-form-card hidden"
-    id="exerciseForm"
-  >
+  <h2 id="exerciseFormTitle">Neue Übung</h2>
 
-    <h2 id="exerciseFormTitle">Neue Übung</h2>
+  <div class="form-grid">
 
-    <div class="form-grid">
+    <div class="input-group">
+      <label>Übungsname *</label>
 
-      <div class="input-group">
-        <label>Übungsname *</label>
-
-        <input
-          type="text"
-          id="newExerciseName"
-          placeholder="z. B. Step-up"
-        >
-      </div>
-
-
-      <div class="input-group">
-        <label>Kategorie</label>
-
-        <select id="newExerciseCategory">
-          <option>Unterkörper</option>
-          <option>Oberkörper</option>
-          <option>Rumpf</option>
-          <option>Mobilität</option>
-          <option>Koordination</option>
-          <option>Ausdauer</option>
-          <option>Sonstiges</option>
-        </select>
-
-      </div>
-
-
-      <div class="input-group">
-        <label>Körperregion</label>
-
-        <input
-          type="text"
-          id="newExerciseRegion"
-          placeholder="optional"
-        >
-      </div>
-
-    </div>
-
-
-    <div class="input-group form-note">
-
-      <label>Notiz</label>
-
-      <textarea
-        id="newExerciseNote"
-        class="exercise-note"
-        placeholder="Optional"
-      ></textarea>
-
-    </div>
-
-
-    <div class="form-actions">
-
-      <button
-        class="secondary-button"
-        id="cancelExerciseButton"
+      <input
+        type="text"
+        id="newExerciseName"
+        placeholder="z. B. Step-up"
       >
-        Abbrechen
-      </button>
-
-      <button
-        class="continue-button"
-        id="saveExerciseButton"
-      >
-        Übung speichern
-      </button>
-
     </div>
 
-  </section>
+
+    <div class="input-group">
+      <label>Kategorie</label>
+
+      <select id="newExerciseCategory">
+        <option>Unterkörper</option>
+        <option>Oberkörper</option>
+        <option>Rumpf</option>
+        <option>Mobilität</option>
+        <option>Koordination</option>
+        <option>Ausdauer</option>
+        <option>Sonstiges</option>
+      </select>
+    </div>
+
+
+    <div class="input-group">
+      <label>Körperregion</label>
+
+      <input
+        type="text"
+        id="newExerciseRegion"
+        placeholder="z. B. Knie, Schulter, Rücken"
+      >
+    </div>
+
+
+    <div class="input-group">
+      <label>Material / Gerät</label>
+
+      <input
+        type="text"
+        id="newExerciseEquipment"
+        placeholder="z. B. Theraband, Kurzhantel, Beinpresse"
+      >
+    </div>
+
+  </div>
+
+
+  <div class="input-group form-note">
+
+    <label>Notiz / Standard-Anweisung</label>
+
+    <textarea
+      id="newExerciseNote"
+      class="exercise-note"
+      placeholder="z. B. langsam absenken, Knieachse kontrollieren ..."
+    ></textarea>
+
+  </div>
+
+
+  <div class="form-actions">
+
+    <button
+      class="secondary-button"
+      id="cancelExerciseButton"
+    >
+      Abbrechen
+    </button>
+
+    <button
+      class="continue-button"
+      id="saveExerciseButton"
+    >
+      Übung speichern
+    </button>
+
+  </div>
+
+</section>
 
 </main>
 <!-- GESPEICHERTE PLÄNE -->
@@ -556,6 +734,9 @@
 
 </main>
 
-  <script src="app.js"></script>
+ <script src="vendor/jspdf.umd.min.js"></script>
+<script src="vendor/jspdf.plugin.autotable.min.js"></script>
+<script src="app.js"></script>
+
 </body>
 </html>

@@ -620,9 +620,13 @@ gap: 10px;
 
   accent-color: #168477;
 }
-/* PDF-Vorschau */
+
+/* ============================= */
+/* PDF-VORSCHAU                   */
+/* ============================= */
 
 .preview-wrapper {
+  width: 100%;
   overflow-x: auto;
   padding: 15px 0 30px;
 }
@@ -633,54 +637,91 @@ gap: 10px;
   min-height: 790px;
 
   margin: 0 auto;
-  padding: 35px;
+  padding: 32px;
 
   background: white;
+  color: #20272d;
 
   border: 1px solid #dfe5e5;
-  border-radius: 4px;
+  border-radius: 6px;
 
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-
-  color: #20272d;
+  box-shadow:
+    0 8px 30px
+    rgba(0, 0, 0, 0.08);
 }
 
+
+/* Kopfbereich */
 
 .pdf-header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+  gap: 30px;
 
-  padding-bottom: 16px;
+  padding-bottom: 14px;
   margin-bottom: 18px;
 
   border-bottom: 2px solid #20272d;
 }
 
 
+.pdf-header-label {
+  margin-bottom: 5px;
+
+  color: #168477;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 0.12em;
+}
+
+
 .pdf-header h2 {
   margin: 0;
 
-  font-size: 22px;
+  font-size: 21px;
+  line-height: 1.2;
+
   text-transform: uppercase;
 }
 
 
-.pdf-header-fields {
-  font-size: 12px;
+.pdf-plan-name {
+  margin-top: 6px;
+
+  color: #56636b;
+
+  font-size: 11px;
+  font-weight: 600;
 }
 
 
-/* Tabelle */
+.pdf-header-fields {
+  flex-shrink: 0;
+
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+
+/* ============================= */
+/* TRAININGSTABELLE               */
+/* ============================= */
+
+.training-table-wrapper {
+  width: 100%;
+}
+
 
 .training-table {
   width: 100%;
 
   border-collapse: collapse;
-
   table-layout: fixed;
 
-  font-size: 10px;
+  font-size: 9px;
 }
 
 
@@ -691,20 +732,23 @@ gap: 10px;
 
 
 .training-table th {
-  padding: 7px 3px;
+  padding: 6px 2px;
 
-  background: #f0f3f3;
+  background: #eef3f2;
 
-  font-size: 9px;
+  font-size: 8px;
+  font-weight: 700;
+
+  text-align: center;
 }
 
 
 .training-table th:first-child {
-  width: 185px;
-
-  text-align: left;
+  width: 190px;
 
   padding-left: 8px;
+
+  text-align: left;
 }
 
 
@@ -720,13 +764,14 @@ gap: 10px;
 
   margin-bottom: 3px;
 
-  font-size: 11px;
+  font-size: 10px;
 }
 
 
 .exercise-main-cell small {
   color: #4e5961;
 
+  font-size: 8px;
   line-height: 1.3;
 }
 
@@ -737,25 +782,29 @@ gap: 10px;
 
 
 .pain-label-cell {
-  padding: 5px 8px;
+  padding: 4px 8px;
 
   background: #fafafa;
 
-  font-size: 9px;
+  color: #59666e;
+
+  font-size: 8px;
 }
 
 
 .pain-entry-cell {
-  height: 22px;
+  height: 21px;
 
   background: #fafafa;
 }
 
 
-/* Allgemeines Monitoring */
+/* ============================= */
+/* ALLGEMEINES MONITORING         */
+/* ============================= */
 
 .general-monitoring {
-  margin-top: 14px;
+  margin-top: 13px;
 }
 
 
@@ -765,47 +814,89 @@ gap: 10px;
   border-collapse: collapse;
   table-layout: fixed;
 
-  font-size: 9px;
+  font-size: 8px;
 }
 
 
 .monitoring-table td {
-  height: 30px;
+  height: 29px;
 
   border: 1px solid #aeb7bd;
 }
 
 
 .monitoring-label {
-  width: 185px;
+  width: 190px;
 
-  padding: 6px 8px;
+  padding: 5px 8px;
 
-  background: #f0f3f3;
+  background: #eef3f2;
 
   font-weight: 700;
 }
 
 
-/* Notizen */
+/* ============================= */
+/* PDF-NOTIZEN                    */
+/* ============================= */
 
 .pdf-notes {
-  margin-top: 16px;
+  margin-top: 15px;
 
-  font-size: 10px;
+  font-size: 9px;
+}
+
+
+.pdf-notes strong {
+  font-size: 9px;
 }
 
 
 .note-lines {
-  margin-top: 8px;
+  margin-top: 7px;
 }
 
 
 .note-lines div {
-  height: 25px;
+  height: 23px;
 
-  border-bottom: 1px solid #cfd6da;
+  border-bottom:
+    1px solid #cfd6da;
 }
+
+
+/* ============================= */
+/* PDF-AKTIONEN                   */
+/* ============================= */
+
+.pdf-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+
+  margin-top: 25px;
+  padding-bottom: 50px;
+}
+
+
+.pdf-actions button {
+  min-width: 190px;
+}
+
+
+@media (max-width: 700px) {
+
+  .pdf-actions {
+    flex-direction: column;
+  }
+
+  .pdf-actions button {
+    width: 100%;
+  }
+
+}
+
 /* Übungsbibliothek */
 
 .library-toolbar {
@@ -1006,6 +1097,126 @@ gap: 10px;
 }
 
 /* ============================= */
+/* PLANEDITOR V2                 */
+/* ============================= */
+
+.plan-settings {
+  margin-bottom: 22px;
+  padding: 18px;
+  background: white;
+  border: 1px solid #dfe9e8;
+  border-radius: 14px;
+}
+
+.plan-settings input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.plan-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.plan-card-header h3 {
+  margin: 0;
+}
+
+.plan-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.plan-action-button {
+  min-width: 38px;
+  height: 38px;
+  border: 1px solid #d7e3e2;
+  border-radius: 9px;
+  background: white;
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.plan-action-button:hover {
+  background: #f2f8f7;
+}
+
+.plan-delete-button {
+  color: #a33;
+}
+
+.plan-delete-button:hover {
+  background: #fff1f1;
+}
+
+
+@media (max-width: 600px) {
+
+  .plan-card-header {
+    align-items: flex-start;
+  }
+
+  .plan-card-actions {
+    flex-shrink: 0;
+  }
+
+}
+
+.draft-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+  padding: 16px 18px;
+  background: #f7fbfa;
+  border: 1px solid #d6e7e5;
+  border-radius: 14px;
+}
+
+.draft-card.hidden {
+  display: none;
+}
+
+.draft-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.draft-card-text strong {
+  font-size: 16px;
+}
+
+.draft-card-text small {
+  color: #617675;
+}
+
+.draft-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 600px) {
+  .draft-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .draft-card-actions {
+    width: 100%;
+  }
+
+  .draft-card-actions button {
+    flex: 1;
+  }
+}
+
+/* ============================= */
 /* EINHEITLICHE NAVIGATION       */
 /* ============================= */
 
@@ -1053,15 +1264,55 @@ gap: 10px;
 
 }
 
+/* ============================= */
+/* FAVORITEN ÜBUNGSBIBLIOTHEK    */
+/* ============================= */
+
+.library-exercise-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.favorite-button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #8aa09e;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.favorite-button:hover {
+  background: #f2f8f7;
+}
+
+.favorite-button.active {
+  color: #256f6c;
+}
+
+/* ============================= */
+/* DRUCK / PDF                    */
+/* ============================= */
+
 @media print {
 
   @page {
     size: A4 landscape;
-    margin: 10mm;
+    margin: 8mm;
   }
 
 
+  html,
   body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+
     background: white;
   }
 
@@ -1079,23 +1330,50 @@ gap: 10px;
 
   #pdfSheet {
     position: absolute;
+
     left: 0;
     top: 0;
 
     width: 100%;
-    min-height: auto;
+    min-height: 0;
 
     margin: 0;
     padding: 0;
 
     border: none;
+    border-radius: 0;
+
     box-shadow: none;
   }
 
 
   .preview-wrapper {
     overflow: visible;
+
     padding: 0;
+  }
+
+
+  .training-table {
+    page-break-inside: auto;
+  }
+
+
+  .training-table thead {
+    display: table-header-group;
+  }
+
+
+  .training-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+
+  .general-monitoring,
+  .pdf-notes {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
 }

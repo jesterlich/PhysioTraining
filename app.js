@@ -15,6 +15,8 @@ newPlanButton.addEventListener("click", function () {
   savePlanButton.textContent =
     "Plan speichern";
 
+planNameInput.value = "";
+
   exerciseSearch.value = "";
 
   activeExerciseCategory = "Alle";
@@ -80,7 +82,405 @@ const planExercises =
 const backToExercisesButton =
   document.getElementById("backToExercisesButton");
 
+// =====================================
+// ÜBUNGSKARTE IM PLAN ERSTELLEN
+// =====================================
 
+function createPlanExerciseCard(
+  exercise,
+  index
+) {
+
+  const card =
+    document.createElement("div");
+
+  card.className =
+    "plan-exercise-card";
+
+  card.innerHTML = `
+
+    <div class="plan-card-header">
+
+      <h3>
+        <span class="exercise-number">
+          ${index + 1}
+        </span>
+        ${exercise.name}
+      </h3>
+
+      <div class="plan-card-actions">
+
+        <button
+          type="button"
+          class="plan-action-button move-up-button"
+          title="Nach oben"
+        >
+          ↑
+        </button>
+
+        <button
+          type="button"
+          class="plan-action-button move-down-button"
+          title="Nach unten"
+        >
+          ↓
+        </button>
+
+        <button
+          type="button"
+          class="plan-action-button plan-delete-button"
+          title="Übung entfernen"
+        >
+          ×
+        </button>
+
+      </div>
+
+    </div>
+
+<div class="quick-values">
+
+  <span class="quick-values-label">
+    Schnellwahl:
+  </span>
+
+  <button
+    type="button"
+    class="quick-value-button"
+    data-type="reps"
+    data-sets="3"
+    data-value="10"
+  >
+    3 × 10
+  </button>
+
+  <button
+    type="button"
+    class="quick-value-button"
+    data-type="reps"
+    data-sets="3"
+    data-value="12"
+  >
+    3 × 12
+  </button>
+
+  <button
+    type="button"
+    class="quick-value-button"
+    data-type="reps"
+    data-sets="3"
+    data-value="15"
+  >
+    3 × 15
+  </button>
+
+  <button
+    type="button"
+    class="quick-value-button"
+    data-type="free"
+    data-value="3 × 30 Sek."
+  >
+    3 × 30 Sek.
+  </button>
+
+  <button
+    type="button"
+    class="quick-value-button"
+    data-type="free"
+    data-value="3 × 45 Sek."
+  >
+    3 × 45 Sek.
+  </button>
+
+  <button
+    type="button"
+    class="quick-value-button"
+    data-type="free"
+    data-value="2 × 60 Sek."
+  >
+    2 × 60 Sek.
+  </button>
+
+</div>
+
+    <div class="input-grid">
+
+      <div class="input-group">
+        <label>Sätze</label>
+
+        <input
+          type="number"
+          min="1"
+          value="${exercise.sets || ""}"
+        >
+      </div>
+
+
+      <div class="input-group">
+        <label>Wiederholungen</label>
+
+        <input
+          type="text"
+          value="${exercise.reps || ""}"
+        >
+      </div>
+
+
+      <div class="input-group">
+        <label>Gewicht</label>
+
+        <input
+          type="text"
+          placeholder="z. B. 40 kg"
+          value="${exercise.weight || ""}"
+        >
+      </div>
+
+    </div>
+
+
+    <div class="full-input">
+
+      <div class="input-group">
+
+        <label>Freie Vorgabe</label>
+
+        <input
+          type="text"
+          placeholder="z. B. 3 × 30 Sek. oder Schmerz ≤ 3/10"
+          value="${exercise.free || ""}"
+        >
+
+      </div>
+
+    </div>
+
+
+    <div class="full-input">
+
+      <div class="input-group">
+
+        <label>Hinweis / Notiz</label>
+
+        <textarea
+          class="exercise-note"
+          placeholder="z. B. langsam absenken, Bewegungsumfang anpassen ..."
+        >${exercise.note || ""}</textarea>
+
+      </div>
+
+    </div>
+
+  `;
+
+  return card;
+}
+
+function updatePlanExerciseNumbers() {
+
+  const cards =
+    planExercises.querySelectorAll(
+      ".plan-exercise-card"
+    );
+
+  cards.forEach(
+    function (card, index) {
+
+      const number =
+        card.querySelector(
+          ".exercise-number"
+        );
+
+      if (number) {
+        number.textContent =
+          index + 1;
+      }
+
+    }
+  );
+
+}
+
+function setupPlanExerciseActions() {
+
+  planExercises.addEventListener(
+    "click",
+    function (event) {
+
+ const quickButton =
+  event.target.closest(
+    ".quick-value-button"
+  );
+
+
+// =================================
+// SCHNELLWERTE
+// =================================
+
+if (quickButton) {
+
+  const card =
+    quickButton.closest(
+      ".plan-exercise-card"
+    );
+
+  const inputs =
+    card.querySelectorAll(
+      ".input-grid input"
+    );
+
+  const freeInput =
+    card.querySelector(
+      ".full-input input"
+    );
+
+
+  if (
+    quickButton.dataset.type ===
+    "reps"
+  ) {
+
+    inputs[0].value =
+      quickButton.dataset.sets;
+
+    inputs[1].value =
+      quickButton.dataset.value;
+
+  }
+
+  if (
+    quickButton.dataset.type ===
+    "free"
+  ) {
+
+    freeInput.value =
+      quickButton.dataset.value;
+
+  }
+
+
+  saveCurrentDraft();
+
+  return;
+}
+
+const button =
+  event.target.closest(
+    ".plan-action-button"
+  );
+
+if (!button) {
+  return;
+}
+
+
+      const card =
+        button.closest(
+          ".plan-exercise-card"
+        );
+
+      if (!card) {
+        return;
+      }
+
+
+      // =================================
+      // NACH OBEN
+      // =================================
+
+      if (
+        button.classList.contains(
+          "move-up-button"
+        )
+      ) {
+
+        const previousCard =
+          card.previousElementSibling;
+
+        if (previousCard) {
+
+          planExercises.insertBefore(
+            card,
+            previousCard
+          );
+
+          updatePlanExerciseNumbers();
+          saveCurrentDraft();
+
+        }
+
+        return;
+      }
+
+
+      // =================================
+      // NACH UNTEN
+      // =================================
+
+      if (
+        button.classList.contains(
+          "move-down-button"
+        )
+      ) {
+
+        const nextCard =
+          card.nextElementSibling;
+
+        if (nextCard) {
+
+          planExercises.insertBefore(
+            nextCard,
+            card
+          );
+
+          updatePlanExerciseNumbers();
+          saveCurrentDraft();
+
+        }
+
+        return;
+      }
+
+
+      // =================================
+      // LÖSCHEN
+      // =================================
+
+      if (
+        button.classList.contains(
+          "plan-delete-button"
+        )
+      ) {
+
+        const exerciseName =
+          card
+            .querySelector("h3")
+            .innerText
+            .replace(/^\d+\s*/, "")
+            .trim();
+
+        const confirmed =
+          confirm(
+            `"${exerciseName}" aus dem Plan entfernen?`
+          );
+
+        if (!confirmed) {
+          return;
+        }
+
+        card.remove();
+
+        updatePlanExerciseNumbers();
+        saveCurrentDraft();
+
+      }
+
+    }
+  );
+
+}
+
+setupPlanExerciseActions();
 
 function updateSelection() {
 
@@ -149,80 +549,53 @@ continueButton.addEventListener(
             }
           );
 
-        const card =
-          document.createElement("div");
+const libraryExercise =
+  exerciseLibrary.find(
+    function (exercise) {
 
-        card.className =
-          "plan-exercise-card";
+      return (
+        exercise.name ===
+        exerciseName
+      );
 
-        card.innerHTML = `
-          <h3>
-            <span class="exercise-number">
-              ${index + 1}
-            </span>
-            ${exerciseName}
-          </h3>
+    }
+  );
 
-          <div class="input-grid">
 
-            <div class="input-group">
-              <label>Sätze</label>
-              <input
-                type="number"
-                value="${previousExercise?.sets || ""}"
-              >
-            </div>
+const exerciseData = {
 
-            <div class="input-group">
-              <label>Wiederholungen</label>
-              <input
-                type="text"
-                value="${previousExercise?.reps || ""}"
-              >
-            </div>
+  name: exerciseName,
 
-            <div class="input-group">
-              <label>Gewicht</label>
-              <input
-                type="text"
-                placeholder="z. B. 40 kg"
-                value="${previousExercise?.weight || ""}"
-              >
-            </div>
+  sets:
+    previousExercise?.sets ||
+    "",
 
-          </div>
+  reps:
+    previousExercise?.reps ||
+    "",
 
-          <div class="full-input">
-            <div class="input-group">
+  weight:
+    previousExercise?.weight ||
+    "",
 
-              <label>Freie Vorgabe</label>
+  free:
+    previousExercise?.free ||
+    "",
 
-              <input
-                type="text"
-                placeholder="z. B. 3 × 30 Sek. oder Schmerz ≤ 3/10"
-                value="${previousExercise?.free || ""}"
-              >
+  note:
+    previousExercise?.note ||
+    libraryExercise?.note ||
+    ""
 
-            </div>
-          </div>
+};
 
-          <div class="full-input">
-            <div class="input-group">
+const card =
+  createPlanExerciseCard(
+    exerciseData,
+    index
+  );
 
-              <label>Hinweis / Notiz</label>
-
-              <textarea
-                class="exercise-note"
-                placeholder="z. B. langsam absenken, Bewegungsumfang anpassen ..."
-              >${previousExercise?.note || ""}</textarea>
-
-            </div>
-          </div>
-        `;
-
-        planExercises.appendChild(
-          card
-        );
+planExercises.appendChild(card);
 
       }
     );
@@ -348,6 +721,15 @@ const pdfNotes =
 const printButton =
   document.getElementById("printButton");
 
+  const pdfPlanName =
+  document.getElementById(
+    "pdfPlanName"
+  );
+
+const backToPdfConfigButton =
+  document.getElementById(
+    "backToPdfConfigButton"
+  );
 
 function getSelectedSessionCount() {
 
@@ -403,6 +785,189 @@ function getPlanData() {
 
   return exercises;
 }
+
+// =====================================
+// ENTWURF-SYSTEM
+// =====================================
+
+function saveCurrentDraft() {
+
+  const exercises =
+    getPlanData();
+
+  const draft = {
+    planId: currentPlanId,
+    name: planNameInput.value.trim(),
+    exercises: exercises
+  };
+
+  localStorage.setItem(
+    "currentPlanDraft",
+    JSON.stringify(draft)
+  );
+
+  updateDraftCard();
+}
+
+
+// =====================================
+// ENTWURF-KARTE AKTUALISIEREN
+// =====================================
+
+function updateDraftCard() {
+
+  const storedDraft =
+    localStorage.getItem(
+      "currentPlanDraft"
+    );
+
+  if (!storedDraft) {
+
+    draftCard.classList.add(
+      "hidden"
+    );
+
+    return;
+  }
+
+
+  const draft =
+    JSON.parse(storedDraft);
+
+
+  const exerciseCount =
+    draft.exercises?.length || 0;
+
+
+  if (
+    !draft.name &&
+    exerciseCount === 0
+  ) {
+
+    draftCard.classList.add(
+      "hidden"
+    );
+
+    return;
+  }
+
+
+  draftCard.classList.remove(
+    "hidden"
+  );
+
+
+  const planName =
+    draft.name ||
+    "Unbenannter Trainingsplan";
+
+
+  draftCardInfo.textContent =
+    `${planName} · ${exerciseCount} Übungen`;
+
+}
+
+
+// =====================================
+// ENTWURF LADEN
+// =====================================
+
+function loadDraft() {
+
+  const storedDraft =
+    localStorage.getItem(
+      "currentPlanDraft"
+    );
+
+  if (!storedDraft) {
+    return;
+  }
+
+
+  const draft =
+    JSON.parse(storedDraft);
+
+
+  currentPlanId =
+    draft.planId ?? null;
+
+
+  planNameInput.value =
+    draft.name || "";
+
+
+  planExercises.innerHTML = "";
+
+
+  const exercises =
+    draft.exercises || [];
+
+
+  exercises.forEach(
+    function (exercise, index) {
+
+      const card =
+        createPlanExerciseCard(
+          exercise,
+          index
+        );
+
+      planExercises.appendChild(
+        card
+      );
+
+    }
+  );
+
+
+  savePlanButton.textContent =
+    currentPlanId === null
+      ? "Plan speichern"
+      : "Plan aktualisieren";
+
+
+  document
+    .querySelectorAll(".view")
+    .forEach(
+      function (view) {
+
+        view.classList.remove(
+          "active-view"
+        );
+
+      }
+    );
+
+
+  planView.classList.add(
+    "active-view"
+  );
+
+
+  window.scrollTo(
+    0,
+    0
+  );
+
+}
+
+
+// =====================================
+// ENTWURF VERWERFEN
+// =====================================
+
+function discardDraft() {
+
+  localStorage.removeItem(
+    "currentPlanDraft"
+  );
+
+  updateDraftCard();
+
+}
+
+
+
 function createTrainingTable(
   exercises,
   sessionCount,
@@ -645,6 +1210,15 @@ createPreviewButton.addEventListener(
     const sessionCount =
       getSelectedSessionCount();
 
+      const currentPlanName =
+  planNameInput.value.trim();
+
+pdfPlanName.textContent =
+  currentPlanName
+    ? "Trainingsplan: " +
+      currentPlanName
+    : "Trainingsplan";
+
 
     const includePain =
       document.getElementById(
@@ -728,6 +1302,738 @@ backToConfigButton.addEventListener(
 
   }
 );
+
+backToPdfConfigButton.addEventListener(
+  "click",
+  function () {
+
+    previewView.classList.remove(
+      "active-view"
+    );
+
+    pdfConfigView.classList.add(
+      "active-view"
+    );
+
+    window.scrollTo(
+      0,
+      0
+    );
+
+  }
+);
+
+// =====================================
+// ECHTE PDF-DATEI ERZEUGEN
+// =====================================
+
+const savePdfButton =
+  document.getElementById(
+    "savePdfButton"
+  );
+
+const sharePdfButton =
+  document.getElementById(
+    "sharePdfButton"
+  );
+
+
+function createPdfDocument() {
+
+  if (
+    !window.jspdf ||
+    !window.jspdf.jsPDF
+  ) {
+
+    alert(
+      "Die PDF-Bibliothek konnte nicht geladen werden."
+    );
+
+    return null;
+  }
+
+
+  const { jsPDF } =
+    window.jspdf;
+
+
+  const doc =
+    new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4"
+    });
+
+
+  const exercises =
+    getPlanData();
+
+
+  const sessionCount =
+    getSelectedSessionCount();
+
+
+  const planName =
+    planNameInput.value.trim() ||
+    "Trainingsplan";
+
+
+  const includePain =
+    document.getElementById(
+      "includeExercisePain"
+    ).checked;
+
+
+  const include24h =
+    document.getElementById(
+      "include24h"
+    ).checked;
+
+
+  const includeGeneralPain =
+    document.getElementById(
+      "includeGeneralPain"
+    ).checked;
+
+
+  const includeRpe =
+    document.getElementById(
+      "includeRpe"
+    ).checked;
+
+
+  const includeNotes =
+    document.getElementById(
+      "includeNotes"
+    ).checked;
+
+
+  // =================================
+  // KOPFBEREICH
+  // =================================
+
+  doc.setFont(
+    "helvetica",
+    "bold"
+  );
+
+  doc.setFontSize(8);
+
+  doc.text(
+    "PHYSIO TRAINING",
+    10,
+    10
+  );
+
+
+  doc.setFontSize(15);
+
+  doc.text(
+    "Trainings- und Belastungsprotokoll",
+    10,
+    17
+  );
+
+
+  doc.setFont(
+    "helvetica",
+    "normal"
+  );
+
+  doc.setFontSize(9);
+
+  doc.text(
+    "Trainingsplan: " + planName,
+    10,
+    23
+  );
+
+
+  doc.text(
+    "Zeitraum: __________________",
+    230,
+    23
+  );
+
+
+  // =================================
+  // HAUPTTABELLE
+  // =================================
+
+  const tableHead = [
+    [
+      "Übung / Vorgabe"
+    ]
+  ];
+
+
+  for (
+    let i = 1;
+    i <= sessionCount;
+    i++
+  ) {
+
+    tableHead[0].push(
+      "Datum\n__ / __"
+    );
+
+  }
+
+
+  const tableBody = [];
+
+
+  exercises.forEach(
+    function (exercise) {
+
+      let prescription = "";
+
+
+      if (exercise.sets) {
+
+        prescription +=
+          exercise.sets + " × ";
+
+      }
+
+
+      if (exercise.reps) {
+
+        prescription +=
+          exercise.reps;
+
+      }
+
+
+      if (exercise.weight) {
+
+        if (prescription) {
+
+          prescription += " · ";
+
+        }
+
+        prescription +=
+          exercise.weight;
+
+      }
+
+
+      if (exercise.free) {
+
+        if (prescription) {
+
+          prescription += " · ";
+
+        }
+
+        prescription +=
+          exercise.free;
+
+      }
+
+
+      let exerciseText =
+        exercise.name;
+
+
+      if (prescription) {
+
+        exerciseText +=
+          "\n" + prescription;
+
+      }
+
+
+      if (exercise.note) {
+
+        exerciseText +=
+          "\n" + exercise.note;
+
+      }
+
+
+      const exerciseRow = [
+        exerciseText
+      ];
+
+
+      for (
+        let i = 0;
+        i < sessionCount;
+        i++
+      ) {
+
+        exerciseRow.push("");
+
+      }
+
+
+      tableBody.push(
+        exerciseRow
+      );
+
+
+      if (includePain) {
+
+        const painRow = [
+          "Schmerz bei Übung (0–10)"
+        ];
+
+
+        for (
+          let i = 0;
+          i < sessionCount;
+          i++
+        ) {
+
+          painRow.push("");
+
+        }
+
+
+        tableBody.push(
+          painRow
+        );
+
+      }
+
+    }
+  );
+
+
+  doc.autoTable({
+
+    startY: 28,
+
+    head: tableHead,
+
+    body: tableBody,
+
+    margin: {
+      left: 10,
+      right: 10
+    },
+
+    theme: "grid",
+
+    styles: {
+      font: "helvetica",
+      fontSize: 6.5,
+      cellPadding: 2,
+      valign: "middle",
+      overflow: "linebreak",
+      lineWidth: 0.15
+    },
+
+    headStyles: {
+      fontStyle: "bold",
+      halign: "center",
+      fontSize: 6.5
+    },
+
+    columnStyles: {
+      0: {
+        cellWidth: 52,
+        halign: "left"
+      }
+    },
+
+    rowPageBreak:
+      "avoid",
+
+    showHead:
+      "everyPage"
+
+  });
+
+
+  // =================================
+  // POSITION NACH DER TABELLE
+  // =================================
+
+  let currentY =
+    doc.lastAutoTable.finalY + 5;
+
+
+  const pageHeight =
+    doc.internal.pageSize.getHeight();
+
+
+  // Genug Platz für Monitoring /
+  // Notizen sicherstellen
+
+  if (
+    currentY >
+    pageHeight - 40
+  ) {
+
+    doc.addPage();
+
+    currentY = 15;
+
+  }
+
+
+  // =================================
+  // ALLGEMEINES MONITORING
+  // =================================
+
+  const monitoringRows = [];
+
+
+  if (include24h) {
+
+    monitoringRows.push(
+      "24-h-Reaktion"
+    );
+
+  }
+
+
+  if (includeGeneralPain) {
+
+    monitoringRows.push(
+      "Allg. Schmerz (0–10)"
+    );
+
+  }
+
+
+  if (includeRpe) {
+
+    monitoringRows.push(
+      "RPE (0–10)"
+    );
+
+  }
+
+
+  if (
+    monitoringRows.length > 0
+  ) {
+
+    const monitoringBody =
+      monitoringRows.map(
+        function (label) {
+
+          const row = [
+            label
+          ];
+
+
+          for (
+            let i = 0;
+            i < sessionCount;
+            i++
+          ) {
+
+            row.push("");
+
+          }
+
+
+          return row;
+
+        }
+      );
+
+
+    doc.autoTable({
+
+      startY: currentY,
+
+      body: monitoringBody,
+
+      margin: {
+        left: 10,
+        right: 10
+      },
+
+      theme: "grid",
+
+      styles: {
+        font: "helvetica",
+        fontSize: 6.5,
+        cellPadding: 2,
+        minCellHeight: 7
+      },
+
+      columnStyles: {
+        0: {
+          cellWidth: 52,
+          fontStyle: "bold"
+        }
+      }
+
+    });
+
+
+    currentY =
+      doc.lastAutoTable.finalY + 5;
+
+  }
+
+
+  // =================================
+  // NOTIZEN
+  // =================================
+
+  if (includeNotes) {
+
+    if (
+      currentY >
+      pageHeight - 30
+    ) {
+
+      doc.addPage();
+
+      currentY = 15;
+
+    }
+
+
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
+    doc.setFontSize(8);
+
+    doc.text(
+      "Notizen / Besonderheiten",
+      10,
+      currentY
+    );
+
+
+    currentY += 5;
+
+
+    doc.setDrawColor(
+      190,
+      195,
+      198
+    );
+
+
+    for (
+      let i = 0;
+      i < 3;
+      i++
+    ) {
+
+      doc.line(
+        10,
+        currentY,
+        287,
+        currentY
+      );
+
+      currentY += 7;
+
+    }
+
+  }
+
+
+  // =================================
+  // SEITENZAHLEN
+  // =================================
+
+  const pageCount =
+    doc.getNumberOfPages();
+
+
+  for (
+    let page = 1;
+    page <= pageCount;
+    page++
+  ) {
+
+    doc.setPage(page);
+
+    doc.setFont(
+      "helvetica",
+      "normal"
+    );
+
+    doc.setFontSize(7);
+
+    doc.text(
+      "Seite " +
+        page +
+        " / " +
+        pageCount,
+      287,
+      202,
+      {
+        align: "right"
+      }
+    );
+
+  }
+
+
+  return doc;
+
+}
+
+
+// =====================================
+// DATEINAME ERSTELLEN
+// =====================================
+
+function getPdfFileName() {
+
+  const planName =
+    planNameInput.value.trim() ||
+    "Trainingsplan";
+
+
+  const safeName =
+    planName
+      .replace(
+        /[^a-zA-Z0-9äöüÄÖÜß_-]/g,
+        "_"
+      )
+      .replace(
+        /_+/g,
+        "_"
+      );
+
+
+  return (
+    "Trainingsplan_" +
+    safeName +
+    ".pdf"
+  );
+
+}
+
+
+// =====================================
+// PDF SPEICHERN
+// =====================================
+
+savePdfButton.addEventListener(
+  "click",
+  function () {
+
+    const doc =
+      createPdfDocument();
+
+
+    if (!doc) {
+      return;
+    }
+
+
+    doc.save(
+      getPdfFileName()
+    );
+
+  }
+);
+
+
+// =====================================
+// PDF TEILEN
+// =====================================
+
+sharePdfButton.addEventListener(
+  "click",
+  async function () {
+
+    const doc =
+      createPdfDocument();
+
+
+    if (!doc) {
+      return;
+    }
+
+
+    const pdfBlob =
+      doc.output("blob");
+
+
+    const pdfFile =
+      new File(
+        [pdfBlob],
+        getPdfFileName(),
+        {
+          type:
+            "application/pdf"
+        }
+      );
+
+
+    const shareData = {
+      title:
+        "Trainingsplan",
+      files: [
+        pdfFile
+      ]
+    };
+
+
+    try {
+
+      if (
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare(
+          shareData
+        )
+      ) {
+
+        await navigator.share(
+          shareData
+        );
+
+        return;
+
+      }
+
+
+      // Falls direktes Teilen
+      // auf dem Gerät nicht geht:
+      doc.save(
+        getPdfFileName()
+      );
+
+
+      alert(
+        "Direktes Teilen wird auf diesem Gerät nicht unterstützt. Die PDF wurde stattdessen gespeichert."
+      );
+
+
+    } catch (error) {
+
+      // Abbrechen des Teilen-Menüs
+      // ist kein echter Fehler.
+      if (
+        error.name !==
+        "AbortError"
+      ) {
+
+        console.error(
+          "PDF konnte nicht geteilt werden:",
+          error
+        );
+
+        alert(
+          "Die PDF konnte nicht geteilt werden."
+        );
+
+      }
+
+    }
+
+  }
+);
+
 printButton.addEventListener(
   "click",
   function () {
@@ -831,157 +2137,362 @@ function saveExerciseLibrary() {
 
 }
 
-function renderLibrary(searchTerm = "") {
+// =====================================
+// ÜBUNGSBIBLIOTHEK ANZEIGEN
+// =====================================
+
+function renderLibrary(
+  searchTerm = "",
+  favoritesOnly = false
+) {
 
   libraryList.innerHTML = "";
 
 
-  exerciseLibrary.forEach(function (exercise, index) {
+  const sortedExercises =
+    exerciseLibrary
+      .map(function (exercise, index) {
 
-    const matchesSearch =
-      exercise.name
-        .toLowerCase()
-        .includes(
-          searchTerm.toLowerCase()
+        return {
+          exercise: exercise,
+          originalIndex: index
+        };
+
+      })
+      .filter(function (item) {
+
+        const exercise =
+          item.exercise;
+
+
+        const matchesSearch =
+          exercise.name
+            .toLowerCase()
+            .includes(
+              searchTerm.toLowerCase()
+            );
+
+
+        const matchesFavorite =
+          !favoritesOnly ||
+          exercise.favorite === true;
+
+
+        return (
+          matchesSearch &&
+          matchesFavorite
         );
 
+      })
+      .sort(function (a, b) {
 
-    if (!matchesSearch) {
+        return a.exercise.name.localeCompare(
+          b.exercise.name,
+          "de",
+          {
+            sensitivity: "base"
+          }
+        );
+
+      });
+
+
+  sortedExercises.forEach(
+    function (item) {
+
+      const exercise =
+        item.exercise;
+
+      const index =
+        item.originalIndex;
+
+      const isFavorite =
+        exercise.favorite === true;
+
+
+      const libraryItem =
+        document.createElement("div");
+
+      libraryItem.className =
+        "library-exercise";
+
+
+      libraryItem.innerHTML = `
+
+        <div class="library-exercise-info">
+
+          <div class="library-exercise-title">
+
+            <button
+              type="button"
+              class="favorite-button ${isFavorite ? "active" : ""}"
+              data-index="${index}"
+              title="${isFavorite ? "Favorit entfernen" : "Als Favorit markieren"}"
+            >
+              ${isFavorite ? "★" : "☆"}
+            </button>
+
+            <strong>
+              ${exercise.name}
+            </strong>
+
+          </div>
+
+          <small>
+            ${exercise.region || "Keine Körperregion"}
+          </small>
+
+          ${
+            exercise.equipment
+              ? `
+                <small>
+                  Material: ${exercise.equipment}
+                </small>
+              `
+              : ""
+          }
+
+        </div>
+
+
+        <div class="library-actions">
+
+          <span class="category-badge">
+            ${exercise.category}
+          </span>
+
+          <button
+            class="edit-button"
+            data-index="${index}"
+          >
+            Bearbeiten
+          </button>
+
+          <button
+            class="delete-button"
+            data-index="${index}"
+          >
+            Löschen
+          </button>
+
+        </div>
+
+      `;
+
+
+      libraryList.appendChild(
+        libraryItem
+      );
+
+    }
+  );
+
+}
+
+document
+  .getElementById(
+    "newExerciseEquipment"
+  )
+  .value = "";
+
+// =====================================
+// FAVORITEN IN DER ÜBUNGSBIBLIOTHEK
+// =====================================
+
+libraryList.addEventListener(
+  "click",
+  function (event) {
+
+    const favoriteButton =
+      event.target.closest(
+        ".favorite-button"
+      );
+
+    if (!favoriteButton) {
       return;
     }
 
 
-    const item =
-      document.createElement("div");
-
-    item.className =
-      "library-exercise";
-
-
-    item.innerHTML = `
-
-      <div class="library-exercise-info">
-
-        <strong>
-          ${exercise.name}
-        </strong>
-
-        <small>
-          ${exercise.region || "Keine Körperregion"}
-        </small>
-
-      </div>
+    const index =
+      Number(
+        favoriteButton.dataset.index
+      );
 
 
-      <div class="library-actions">
-
-        <span class="category-badge">
-          ${exercise.category}
-        </span>
-
-        <button
-          class="edit-button"
-          data-index="${index}"
-        >
-          Bearbeiten
-        </button>
-
-        <button
-          class="delete-button"
-          data-index="${index}"
-        >
-          Löschen
-        </button>
-
-      </div>
-
-    `;
+    const exercise =
+      exerciseLibrary[index];
 
 
-    libraryList.appendChild(item);
+    if (!exercise) {
+      return;
+    }
 
-  });
 
-}
+    exercise.favorite =
+      exercise.favorite !== true;
+
+
+    localStorage.setItem(
+      "exerciseLibrary",
+      JSON.stringify(
+        exerciseLibrary
+      )
+    );
+
+
+    if (exercise.favorite) {
+
+      favoriteButton.textContent =
+        "★";
+
+      favoriteButton.classList.add(
+        "active"
+      );
+
+      favoriteButton.title =
+        "Favorit entfernen";
+
+    } else {
+
+      favoriteButton.textContent =
+        "☆";
+
+      favoriteButton.classList.remove(
+        "active"
+      );
+
+      favoriteButton.title =
+        "Als Favorit markieren";
+
+    }
+
+  }
+);
 
 function renderExerciseSelection(
   searchTerm = "",
-  category = "Alle"
+  category = "Alle",
+  favoritesOnly = false
 ) {
 
   const exerciseList =
-    document.getElementById("exerciseList");
+    document.getElementById(
+      "exerciseList"
+    );
 
   exerciseList.innerHTML = "";
 
 
   const filteredExercises =
-    exerciseLibrary.filter(function (exercise) {
+    exerciseLibrary
+      .filter(function (exercise) {
 
-      const matchesSearch =
-        exercise.name
-          .toLowerCase()
-          .includes(
-            searchTerm.toLowerCase()
-          );
-
-
-      const matchesCategory =
-        category === "Alle" ||
-        exercise.category === category;
+        const matchesSearch =
+          exercise.name
+            .toLowerCase()
+            .includes(
+              searchTerm.toLowerCase()
+            );
 
 
-      return matchesSearch && matchesCategory;
-
-    });
-
-
-  filteredExercises.forEach(function (exercise) {
-
-    const item =
-      document.createElement("label");
-
-    item.className = "exercise-item";
+        const matchesCategory =
+          category === "Alle" ||
+          exercise.category ===
+            category;
 
 
-    item.innerHTML = `
-      <input
-        type="checkbox"
-        value="${exercise.name}"
-      >
+        const matchesFavorite =
+          !favoritesOnly ||
+          exercise.favorite === true;
 
-      <span>
 
-        <strong>
-          ${exercise.name}
-        </strong>
+        return (
+          matchesSearch &&
+          matchesCategory &&
+          matchesFavorite
+        );
 
-        <small>
-          ${exercise.category}
-          ${
-            exercise.region
-              ? " · " + exercise.region
-              : ""
+      })
+      .sort(function (a, b) {
+
+        return a.name.localeCompare(
+          b.name,
+          "de",
+          {
+            sensitivity: "base"
           }
-        </small>
+        );
 
-      </span>
-    `;
+      });
 
 
-    exerciseList.appendChild(item);
+  filteredExercises.forEach(
+    function (exercise) {
 
-  });
+      const item =
+        document.createElement(
+          "label"
+        );
+
+      item.className =
+        "exercise-item";
+
+
+      item.innerHTML = `
+
+        <input
+          type="checkbox"
+          value="${exercise.name}"
+        >
+
+        <span>
+
+          <strong>
+            ${exercise.name}
+          </strong>
+
+          <small>
+            ${exercise.category}
+            ${
+              exercise.region
+                ? " · " +
+                  exercise.region
+                : ""
+            }
+            ${
+              exercise.equipment
+                ? " · " +
+                  exercise.equipment
+                : ""
+            }
+            ${
+              exercise.favorite === true
+                ? " · ★"
+                : ""
+            }
+          </small>
+
+        </span>
+
+      `;
+
+
+      exerciseList.appendChild(
+        item
+      );
+
+    }
+  );
 
 
   addExerciseCheckboxListeners();
 
 }
+
 let activeExerciseCategory = "Alle";
 
 const exerciseSearch =
   document.getElementById("exerciseSearch");
-
 
 exerciseSearch.addEventListener(
   "input",
@@ -989,51 +2500,101 @@ exerciseSearch.addEventListener(
 
     renderExerciseSelection(
       exerciseSearch.value,
-      activeExerciseCategory
+      activeExerciseCategory,
+      showFavoriteExercisesOnly
     );
 
   }
 );
 
+// =====================================
+// FILTER ÜBUNGSAUSWAHL
+// =====================================
+
 const filterButtons =
-  document.querySelectorAll(".filter-button");
-
-
-filterButtons.forEach(function (button) {
-
-  button.addEventListener(
-    "click",
-    function () {
-
-      filterButtons.forEach(
-        function (otherButton) {
-
-          otherButton.classList.remove(
-            "active-filter"
-          );
-
-        }
-      );
-
-
-      button.classList.add(
-        "active-filter"
-      );
-
-
-      activeExerciseCategory =
-        button.textContent.trim();
-
-
-      renderExerciseSelection(
-        exerciseSearch.value,
-        activeExerciseCategory
-      );
-
-    }
+  document.querySelectorAll(
+    ".filter-button[data-category]"
   );
 
-});
+const favoriteFilterButton =
+  document.getElementById(
+    "favoriteFilterButton"
+  );
+
+let showFavoriteExercisesOnly =
+  false;
+
+
+// =====================================
+// KATEGORIEN
+// =====================================
+
+filterButtons.forEach(
+  function (button) {
+
+    button.addEventListener(
+      "click",
+      function () {
+
+        filterButtons.forEach(
+          function (otherButton) {
+
+            otherButton.classList.remove(
+              "active-filter"
+            );
+
+          }
+        );
+
+
+        button.classList.add(
+          "active-filter"
+        );
+
+
+        activeExerciseCategory =
+          button.dataset.category;
+
+
+        renderExerciseSelection(
+          exerciseSearch.value,
+          activeExerciseCategory,
+          showFavoriteExercisesOnly
+        );
+
+      }
+    );
+
+  }
+);
+
+
+// =====================================
+// FAVORITENFILTER
+// =====================================
+
+favoriteFilterButton.addEventListener(
+  "click",
+  function () {
+
+    showFavoriteExercisesOnly =
+      !showFavoriteExercisesOnly;
+
+
+    favoriteFilterButton.classList.toggle(
+      "active-filter",
+      showFavoriteExercisesOnly
+    );
+
+
+    renderExerciseSelection(
+      exerciseSearch.value,
+      activeExerciseCategory,
+      showFavoriteExercisesOnly
+    );
+
+  }
+);
 
 libraryButton.addEventListener(
   "click",
@@ -1068,12 +2629,46 @@ backFromLibraryButton.addEventListener(
   }
 );
 
+const libraryFavoriteFilterButton =
+  document.getElementById(
+    "libraryFavoriteFilterButton"
+  );
+
+let showLibraryFavoritesOnly =
+  false;
+
+
 librarySearch.addEventListener(
   "input",
   function () {
 
     renderLibrary(
-      librarySearch.value
+      librarySearch.value,
+      showLibraryFavoritesOnly
+    );
+
+  }
+);
+
+
+libraryFavoriteFilterButton.addEventListener(
+  "click",
+  function () {
+
+    showLibraryFavoritesOnly =
+      !showLibraryFavoritesOnly;
+
+
+    libraryFavoriteFilterButton
+      .classList.toggle(
+        "active-filter",
+        showLibraryFavoritesOnly
+      );
+
+
+    renderLibrary(
+      librarySearch.value,
+      showLibraryFavoritesOnly
     );
 
   }
@@ -1122,6 +2717,14 @@ saveExerciseButton.addEventListener(
         .value
         .trim();
 
+const equipment =
+  document
+    .getElementById(
+      "newExerciseEquipment"
+    )
+    .value
+    .trim();
+
     const note =
       document
         .getElementById("newExerciseNote")
@@ -1139,13 +2742,21 @@ saveExerciseButton.addEventListener(
 
     }
 
+const existingFavorite =
+  editExerciseIndex !== null &&
+  exerciseLibrary[
+    editExerciseIndex
+  ]?.favorite === true;
 
-    const exerciseData = {
+
+const exerciseData = {
 
   name: name,
   category: category,
   region: region,
-  note: note
+  equipment: equipment,
+  note: note,
+  favorite: existingFavorite
 
 };
 
@@ -1177,6 +2788,12 @@ if (editExerciseIndex === null) {
       .getElementById("newExerciseRegion")
       .value = "";
 
+document
+  .getElementById(
+    "newExerciseEquipment"
+  )
+  .value = "";
+
     document
       .getElementById("newExerciseNote")
       .value = "";
@@ -1199,16 +2816,7 @@ saveExerciseButton.textContent =
 
   }
 );
-librarySearch.addEventListener(
-  "input",
-  function () {
 
-    renderLibrary(
-      librarySearch.value
-    );
-
-  }
-);
 libraryList.addEventListener(
   "click",
   function (event) {
@@ -1252,6 +2860,12 @@ libraryList.addEventListener(
         )
         .value = exercise.region;
 
+        document
+  .getElementById(
+    "newExerciseEquipment"
+  )
+  .value =
+    exercise.equipment || "";
 
       document
         .getElementById(
@@ -1339,12 +2953,83 @@ const savedPlansList =
 const savePlanButton =
   document.getElementById("savePlanButton");
 
+  const planNameInput =
+  document.getElementById(
+    "planNameInput"
+  );
+
+  const duplicatePlanButton =
+  document.getElementById(
+    "duplicatePlanButton"
+  );
+
+  const draftCard =
+  document.getElementById(
+    "draftCard"
+  );
+
+const draftCardInfo =
+  document.getElementById(
+    "draftCardInfo"
+  );
+
+const continueDraftButton =
+  document.getElementById(
+    "continueDraftButton"
+  );
+
+const discardDraftButton =
+  document.getElementById(
+    "discardDraftButton"
+  );
 
   let savedPlans =
   JSON.parse(
     localStorage.getItem("savedPlans")
   ) || [];
 let currentPlanId = null;
+
+
+// =====================================
+// ENTWURF-LISTENER
+// =====================================
+
+planNameInput.addEventListener(
+  "input",
+  saveCurrentDraft
+);
+
+
+planExercises.addEventListener(
+  "input",
+  saveCurrentDraft
+);
+
+
+continueDraftButton.addEventListener(
+  "click",
+  loadDraft
+);
+
+
+discardDraftButton.addEventListener(
+  "click",
+  function () {
+
+    const confirmed =
+      confirm(
+        "Entwurf wirklich verwerfen?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    discardDraft();
+
+  }
+);
+
 
 function savePlansToStorage() {
 
@@ -1362,6 +3047,21 @@ savePlanButton.addEventListener(
     const exercises =
       getPlanData();
 
+    const planName =
+      planNameInput.value.trim();
+
+
+    if (!planName) {
+
+      alert(
+        "Bitte gib dem Trainingsplan einen Namen."
+      );
+
+      planNameInput.focus();
+
+      return;
+    }
+
 
     if (exercises.length === 0) {
 
@@ -1370,46 +3070,80 @@ savePlanButton.addEventListener(
       );
 
       return;
-
     }
 
 
-    const planName =
-      prompt(
-        "Wie soll der Plan heißen?"
+    // =================================
+    // NEUEN PLAN SPEICHERN
+    // =================================
+
+    if (currentPlanId === null) {
+
+      const newPlan = {
+
+        id: Date.now(),
+
+        name: planName,
+
+        exercises: exercises
+
+      };
+
+
+      savedPlans.push(
+        newPlan
       );
 
 
-    if (!planName) {
+      // Der Plan bleibt jetzt als
+      // aktuell geöffneter Plan gesetzt
+      currentPlanId =
+        newPlan.id;
+
+
+      savePlanButton.textContent =
+        "Plan aktualisieren";
+
+
+      savePlansToStorage();
+
+
+discardDraft();
+
+      alert(
+        "Plan wurde gespeichert."
+      );
+
       return;
     }
 
-if (currentPlanId === null) {
 
-  const newPlan = {
+    // =================================
+    // BESTEHENDEN PLAN AKTUALISIEREN
+    // =================================
 
-    id: Date.now(),
+    const planIndex =
+      savedPlans.findIndex(
+        function (plan) {
 
-    name: planName,
+          return (
+            plan.id ===
+            currentPlanId
+          );
 
-    exercises: exercises
+        }
+      );
 
-  };
 
-  savedPlans.push(
-    newPlan
-  );
+    if (planIndex === -1) {
 
-} else {
+      alert(
+        "Der gespeicherte Plan konnte nicht gefunden werden."
+      );
 
-  const planIndex =
-    savedPlans.findIndex(
-      function (plan) {
-        return plan.id === currentPlanId;
-      }
-    );
+      return;
+    }
 
-  if (planIndex !== -1) {
 
     savedPlans[planIndex] = {
 
@@ -1421,19 +3155,82 @@ if (currentPlanId === null) {
 
     };
 
-  }
 
-}
+    savePlansToStorage();
 
-    savePlansToStorage()
 
-    currentPlanId = null;
-
-savePlanButton.textContent =
-  "Plan speichern";
+discardDraft();
 
     alert(
-      "Plan wurde gespeichert."
+      "Plan wurde aktualisiert."
+    );
+
+  }
+);
+
+duplicatePlanButton.addEventListener(
+  "click",
+  function () {
+
+    const exercises =
+      getPlanData();
+
+    const currentName =
+      planNameInput.value.trim();
+
+
+    if (exercises.length === 0) {
+
+      alert(
+        "Der Plan enthält keine Übungen."
+      );
+
+      return;
+    }
+
+
+    const duplicateName =
+      currentName
+        ? currentName + " – Kopie"
+        : "Neuer Trainingsplan";
+
+
+    const duplicatedPlan = {
+
+      id: Date.now(),
+
+      name: duplicateName,
+
+      exercises: exercises
+
+    };
+
+
+    savedPlans.push(
+      duplicatedPlan
+    );
+
+
+    savePlansToStorage();
+
+
+    // Ab jetzt wird die Kopie bearbeitet
+    currentPlanId =
+      duplicatedPlan.id;
+
+
+    planNameInput.value =
+      duplicateName;
+
+
+    savePlanButton.textContent =
+      "Plan aktualisieren";
+
+
+discardDraft();
+
+    alert(
+      "Plan wurde dupliziert."
     );
 
   }
@@ -1570,6 +3367,9 @@ savedPlansList.addEventListener(
 savePlanButton.textContent =
   "Plan aktualisieren";
 
+planNameInput.value =
+  plan.name;
+
     if (!plan) {
       return;
     }
@@ -1581,98 +3381,13 @@ savePlanButton.textContent =
     plan.exercises.forEach(
       function (exercise, index) {
 
-        const card =
-          document.createElement("div");
+const card =
+  createPlanExerciseCard(
+    exercise,
+    index
+  );
 
-        card.className =
-          "plan-exercise-card";
-
-
-        card.innerHTML = `
-
-          <h3>
-            <span class="exercise-number">
-              ${index + 1}
-            </span>
-
-            ${exercise.name}
-          </h3>
-
-
-          <div class="input-grid">
-
-            <div class="input-group">
-              <label>Sätze</label>
-
-              <input
-                type="number"
-                value="${exercise.sets}"
-              >
-            </div>
-
-
-            <div class="input-group">
-              <label>Wiederholungen</label>
-
-              <input
-                type="text"
-                value="${exercise.reps}"
-              >
-            </div>
-
-
-            <div class="input-group">
-              <label>Gewicht</label>
-
-              <input
-                type="text"
-                value="${exercise.weight}"
-              >
-            </div>
-
-          </div>
-
-
-          <div class="full-input">
-
-            <div class="input-group">
-
-              <label>
-                Freie Vorgabe
-              </label>
-
-              <input
-                type="text"
-                value="${exercise.free}"
-              >
-
-            </div>
-
-          </div>
-
-
-          <div class="full-input">
-
-            <div class="input-group">
-
-              <label>
-                Hinweis / Notiz
-              </label>
-
-              <textarea
-                class="exercise-note"
-              >${exercise.note}</textarea>
-
-            </div>
-
-          </div>
-
-        `;
-
-
-        planExercises.appendChild(
-          card
-        );
+planExercises.appendChild(card);
 
       }
     );
@@ -1903,3 +3618,5 @@ function setupGlobalNavigation() {
 
 
 setupGlobalNavigation();
+
+updateDraftCard();
