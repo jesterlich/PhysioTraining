@@ -66,182 +66,394 @@
   </div>
 </div>
 
-    <section class="menu-grid">
+<section class="menu-grid">
 
-      <button class="menu-card primary" id="newPlanButton">
-        <span class="icon">＋</span>
-        <span class="card-text">
-          <strong>Neuer Trainingsplan</strong>
-          <small>Übungen auswählen und als PDF ausgeben</small>
-        </span>
-      </button>
+  <button
+    class="menu-card primary"
+    id="newPlanButton"
+    type="button"
+  >
+    <span class="icon">
+      ＋
+    </span>
 
-      <button class="menu-card">
-        <span class="icon">🏋️</span>
-        <span class="card-text">
-          <strong>Mein Training</strong>
-          <small>Eigenes Training dokumentieren</small>
-        </span>
-      </button>
+    <span class="card-text">
+      <strong>
+        Neuer Trainingsplan
+      </strong>
 
-      <button class="menu-card" id="libraryButton">
-        <span class="icon">☰</span>
-        <span class="card-text">
-          <strong>Übungsbibliothek</strong>
-          <small>Übungen ansehen und verwalten</small>
-        </span>
-      </button>
+      <small>
+        Übungen auswählen und als PDF ausgeben
+      </small>
+    </span>
+  </button>
 
-      <button class="menu-card" id="savedPlansButton">
-        <span class="icon">▣</span>
-        <span class="card-text">
-          <strong>Gespeicherte Pläne</strong>
-          <small>Vorhandene Trainingspläne öffnen</small>
-        </span>
-      </button>
 
-    </section>
+  <button
+    class="menu-card"
+    id="myTrainingButton"
+    type="button"
+  >
+    <span class="icon">
+      🏋️
+    </span>
+
+    <span class="card-text">
+      <strong>
+        Mein Training
+      </strong>
+
+      <small>
+        Eigenes Training dokumentieren
+      </small>
+    </span>
+  </button>
+
+
+  <button
+    class="menu-card"
+    id="libraryButton"
+    type="button"
+  >
+    <span class="icon">
+      ☰
+    </span>
+
+    <span class="card-text">
+      <strong>
+        Übungsbibliothek
+      </strong>
+
+      <small>
+        Übungen ansehen und verwalten
+      </small>
+    </span>
+  </button>
+
+
+  <button
+    class="menu-card"
+    id="savedPlansButton"
+    type="button"
+  >
+    <span class="icon">
+      ▣
+    </span>
+
+    <span class="card-text">
+      <strong>
+        Gespeicherte Pläne
+      </strong>
+
+      <small>
+        Vorhandene Trainingspläne öffnen
+      </small>
+    </span>
+  </button>
+
+
+  <button
+    class="menu-card"
+    id="timerButton"
+    type="button"
+  >
+    <span class="icon">
+      ⏱
+    </span>
+
+    <span class="card-text">
+      <strong>
+        Timer
+      </strong>
+
+      <small>
+        Intervall, EMOM, AMRAP und For Time
+      </small>
+    </span>
+  </button>
+
+
+  <button
+    class="menu-card"
+    id="dataButton"
+    type="button"
+  >
+    <span class="icon">
+      ↻
+    </span>
+
+    <span class="card-text">
+      <strong>
+        Daten & Synchronisation
+      </strong>
+
+      <small>
+        Konto, Synchronisation und Backup
+      </small>
+    </span>
+  </button>
+
+</section>
 
   </main>
 
 <!-- =================================
-     ACCOUNT / SYNCHRONISATION
+     DATEN & SYNCHRONISATION
 ================================== -->
 
-<section class="account-section">
+<main
+  class="app-container view"
+  id="dataView"
+>
 
-  <div id="loggedOutAccount">
+  <button
+    class="back-button"
+    id="backFromDataButton"
+    type="button"
+  >
+    ← Startseite
+  </button>
 
-    <h2>
-      Synchronisation
-    </h2>
 
-    <p class="account-description">
-      Melde dich an, um deine Übungsbibliothek
-      später zwischen mehreren Geräten zu synchronisieren.
+  <section class="hero">
+
+    <p class="eyebrow">
+      Physio Training
     </p>
 
-    <div class="account-fields">
+    <h1>
+      Daten & Synchronisation
+    </h1>
+
+    <p class="subtitle">
+      Verwalte dein Konto,
+      die Synchronisation und deine Backups.
+    </p>
+
+  </section>
+
+
+  <div class="data-settings-grid">
+
+
+    <!-- =============================
+         KONTO & SYNCHRONISATION
+    ============================== -->
+
+    <section class="data-settings-card">
+
+      <div class="data-card-header">
+
+        <div class="data-card-icon">
+          ↻
+        </div>
+
+        <div>
+
+          <h2>
+            Konto & Synchronisation
+          </h2>
+
+          <p>
+            Verwende denselben Account
+            auf mehreren Geräten.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div id="loggedOutAccount">
+
+        <div class="account-fields">
+
+
+          <div class="data-input-group">
+
+            <label for="authEmail">
+              E-Mail-Adresse
+            </label>
+
+            <input
+              id="authEmail"
+              type="email"
+              placeholder="name@beispiel.de"
+              autocomplete="email"
+            >
+
+          </div>
+
+
+          <div class="data-input-group">
+
+            <label for="authPassword">
+              Passwort
+            </label>
+
+            <input
+              id="authPassword"
+              type="password"
+              placeholder="Passwort"
+              autocomplete="current-password"
+            >
+
+          </div>
+
+        </div>
+
+
+        <div class="account-actions">
+
+          <button
+            id="signInButton"
+            class="continue-button"
+            type="button"
+          >
+            Anmelden
+          </button>
+
+
+          <button
+            id="signUpButton"
+            class="secondary-button"
+            type="button"
+          >
+            Registrieren
+          </button>
+
+        </div>
+
+
+        <p
+          id="authMessage"
+          class="auth-message"
+        ></p>
+
+      </div>
+
+
+      <div
+        id="loggedInAccount"
+        hidden
+      >
+
+        <div class="sync-status-box">
+
+          <div class="sync-status-dot">
+          </div>
+
+          <div>
+
+            <small>
+              Angemeldet als
+            </small>
+
+            <strong
+              id="loggedInEmail"
+            ></strong>
+
+          </div>
+
+        </div>
+
+
+        <p class="sync-info">
+          Dein Account ist verbunden.
+          Die Synchronisation der Übungsbibliothek
+          richten wir als nächsten Schritt ein.
+        </p>
+
+
+        <button
+          id="signOutButton"
+          class="secondary-button"
+          type="button"
+        >
+          Abmelden
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =============================
+         BACKUP
+    ============================== -->
+
+    <section class="data-settings-card">
+
+      <div class="data-card-header">
+
+        <div class="data-card-icon">
+          ↓
+        </div>
+
+        <div>
+
+          <h2>
+            Backup
+          </h2>
+
+          <p>
+            Sichere deine Daten zusätzlich
+            unabhängig von der Synchronisation.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="backup-info-box">
+
+        <strong>
+          Im Backup enthalten
+        </strong>
+
+        <span>
+          Übungsbibliothek und gespeicherte Trainingspläne
+        </span>
+
+      </div>
+
+
+      <div class="backup-actions">
+
+        <button
+          id="exportBackupButton"
+          class="continue-button"
+          type="button"
+        >
+          ↓ Backup erstellen
+        </button>
+
+
+        <button
+          id="importBackupButton"
+          class="secondary-button"
+          type="button"
+        >
+          ↑ Backup wiederherstellen
+        </button>
+
+      </div>
+
 
       <input
-        id="authEmail"
-        type="email"
-        placeholder="E-Mail-Adresse"
-        autocomplete="email"
+        id="backupFileInput"
+        type="file"
+        accept=".json,application/json"
+        hidden
       >
 
-      <input
-        id="authPassword"
-        type="password"
-        placeholder="Passwort"
-        autocomplete="current-password"
-      >
+    </section>
 
-    </div>
-
-    <div class="account-actions">
-
-      <button
-        id="signInButton"
-        class="continue-button"
-        type="button"
-      >
-        Anmelden
-      </button>
-
-      <button
-        id="signUpButton"
-        class="secondary-button"
-        type="button"
-      >
-        Registrieren
-      </button>
-
-    </div>
-
-    <p
-      id="authMessage"
-      class="auth-message"
-    ></p>
 
   </div>
 
-
-  <div
-    id="loggedInAccount"
-    hidden
-  >
-
-    <h2>
-      Synchronisation
-    </h2>
-
-    <p>
-      Angemeldet als
-      <strong id="loggedInEmail"></strong>
-    </p>
-
-    <p class="account-status">
-      ● Supabase verbunden
-    </p>
-
-    <button
-      id="signOutButton"
-      class="secondary-button"
-      type="button"
-    >
-      Abmelden
-    </button>
-
-  </div>
-
-</section>
-
-  <!-- =================================
-     BACKUP & DATEN
-================================== -->
-
-<section class="backup-section">
-
-  <h2>
-    Daten & Backup
-  </h2>
-
-  <p class="backup-description">
-    Sichere deine Übungsbibliothek und
-    gespeicherten Trainingspläne oder
-    stelle ein vorhandenes Backup wieder her.
-  </p>
-
-  <div class="backup-actions">
-
-    <button
-      id="exportBackupButton"
-      class="secondary-button"
-      type="button"
-    >
-      ↓ Backup erstellen
-    </button>
-
-    <button
-      id="importBackupButton"
-      class="secondary-button"
-      type="button"
-    >
-      ↑ Backup importieren
-    </button>
-
-  </div>
-
-  <input
-    id="backupFileInput"
-    type="file"
-    accept=".json,application/json"
-    hidden
-  >
-
-</section>
-
+</main>
 
   <!-- ÜBUNGSAUSWAHL -->
   <main class="app-container view" id="exerciseView">

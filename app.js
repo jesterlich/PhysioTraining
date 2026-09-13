@@ -23,6 +23,66 @@ console.log(
 const homeView = document.getElementById("homeView");
 const exerciseView = document.getElementById("exerciseView");
 
+const dataView =
+  document.getElementById(
+    "dataView"
+  );
+
+const dataButton =
+  document.getElementById(
+    "dataButton"
+  );
+
+const backFromDataButton =
+  document.getElementById(
+    "backFromDataButton"
+  );
+
+  // =====================================
+// DATEN & SYNCHRONISATION NAVIGATION
+// =====================================
+
+dataButton.addEventListener(
+  "click",
+  function () {
+
+    homeView.classList.remove(
+      "active-view"
+    );
+
+    dataView.classList.add(
+      "active-view"
+    );
+
+    window.scrollTo(
+      0,
+      0
+    );
+
+  }
+);
+
+
+backFromDataButton.addEventListener(
+  "click",
+  function () {
+
+    dataView.classList.remove(
+      "active-view"
+    );
+
+    homeView.classList.add(
+      "active-view"
+    );
+
+    window.scrollTo(
+      0,
+      0
+    );
+
+  }
+);
+
 const newPlanButton = document.getElementById("newPlanButton");
 const backButton = document.getElementById("backButton");
 
