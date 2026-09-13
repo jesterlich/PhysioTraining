@@ -26,6 +26,353 @@ const exerciseView = document.getElementById("exerciseView");
 const newPlanButton = document.getElementById("newPlanButton");
 const backButton = document.getElementById("backButton");
 
+// =====================================
+// SUPABASE AUTH
+// =====================================
+
+const authEmail =
+  document.getElementById(
+    "authEmail"
+  );
+
+const authPassword =
+  document.getElementById(
+    "authPassword"
+  );
+
+const signInButton =
+  document.getElementById(
+    "signInButton"
+  );
+
+const signUpButton =
+  document.getElementById(
+    "signUpButton"
+  );
+
+const signOutButton =
+  document.getElementById(
+    "signOutButton"
+  );
+
+const authMessage =
+  document.getElementById(
+    "authMessage"
+  );
+
+const loggedOutAccount =
+  document.getElementById(
+    "loggedOutAccount"
+  );
+
+const loggedInAccount =
+  document.getElementById(
+    "loggedInAccount"
+  );
+
+const loggedInEmail =
+  document.getElementById(
+    "loggedInEmail"
+  );
+
+
+// =====================================
+// ACCOUNT-ANZEIGE
+// =====================================
+
+function updateAccountView(
+  user
+) {
+
+  if (user) {
+
+    loggedOutAccount.hidden =
+      true;
+
+    loggedInAccount.hidden =
+      false;
+
+    loggedInEmail.textContent =
+      user.email || "";
+
+  } else {
+
+    loggedOutAccount.hidden =
+      false;
+
+    loggedInAccount.hidden =
+      true;
+
+    loggedInEmail.textContent =
+      "";
+
+  }
+
+}
+
+
+// =====================================
+// AKTUELLE SESSION LADEN
+// =====================================
+
+async function loadCurrentSession() {
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .auth
+      .getSession();
+
+
+  if (error) {
+
+    console.error(
+      "Session konnte nicht geladen werden:",
+      error
+    );
+
+    return;
+
+  }
+
+
+  const user =
+    data.session
+      ? data.session.user
+      : null;
+
+
+  updateAccountView(
+    user
+  );
+
+}
+
+
+loadCurrentSession();
+
+
+// =====================================
+// REGISTRIEREN
+// =====================================
+
+signUpButton.addEventListener(
+  "click",
+  async function () {
+
+    const email =
+      authEmail.value.trim();
+
+    const password =
+      authPassword.value;
+
+
+    if (
+      !email ||
+      !password
+    ) {
+
+      authMessage.textContent =
+        "Bitte E-Mail-Adresse und Passwort eingeben.";
+
+      return;
+
+    }
+
+
+    authMessage.textContent =
+      "Account wird erstellt ...";
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .auth
+        .signUp({
+          email:
+            email,
+          password:
+            password
+        });
+
+
+    if (error) {
+
+      console.error(
+        "Registrierung fehlgeschlagen:",
+        error
+      );
+
+      authMessage.textContent =
+        "Registrierung fehlgeschlagen: " +
+        error.message;
+
+      return;
+
+    }
+
+
+    if (
+      data.user &&
+      !data.session
+    ) {
+
+      authMessage.textContent =
+        "Account erstellt. Bitte bestätige jetzt deine E-Mail-Adresse und melde dich danach an.";
+
+    } else {
+
+      authMessage.textContent =
+        "Account erstellt und angemeldet.";
+
+      updateAccountView(
+        data.user
+      );
+
+    }
+
+  }
+);
+
+
+// =====================================
+// ANMELDEN
+// =====================================
+
+signInButton.addEventListener(
+  "click",
+  async function () {
+
+    const email =
+      authEmail.value.trim();
+
+    const password =
+      authPassword.value;
+
+
+    if (
+      !email ||
+      !password
+    ) {
+
+      authMessage.textContent =
+        "Bitte E-Mail-Adresse und Passwort eingeben.";
+
+      return;
+
+    }
+
+
+    authMessage.textContent =
+      "Anmeldung läuft ...";
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .auth
+        .signInWithPassword({
+          email:
+            email,
+          password:
+            password
+        });
+
+
+    if (error) {
+
+      console.error(
+        "Anmeldung fehlgeschlagen:",
+        error
+      );
+
+      authMessage.textContent =
+        "Anmeldung fehlgeschlagen: " +
+        error.message;
+
+      return;
+
+    }
+
+
+    authMessage.textContent =
+      "";
+
+
+    updateAccountView(
+      data.user
+    );
+
+  }
+);
+
+
+// =====================================
+// ABMELDEN
+// =====================================
+
+signOutButton.addEventListener(
+  "click",
+  async function () {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .auth
+        .signOut();
+
+
+    if (error) {
+
+      console.error(
+        "Abmelden fehlgeschlagen:",
+        error
+      );
+
+      return;
+
+    }
+
+
+    updateAccountView(
+      null
+    );
+
+  }
+);
+
+
+// =====================================
+// AUTH-ÄNDERUNGEN BEOBACHTEN
+// =====================================
+
+supabaseClient
+  .auth
+  .onAuthStateChange(
+    function (
+      event,
+      session
+    ) {
+
+      const user =
+        session
+          ? session.user
+          : null;
+
+
+      updateAccountView(
+        user
+      );
+
+    }
+  );
 
 newPlanButton.addEventListener("click", function () {
   localStorage.removeItem(
@@ -62,6 +409,7 @@ planNameInput.value = "";
     }
 
   });
+
 
 
   renderExerciseSelection(

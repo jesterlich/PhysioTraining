@@ -104,6 +104,99 @@
 
   </main>
 
+<!-- =================================
+     ACCOUNT / SYNCHRONISATION
+================================== -->
+
+<section class="account-section">
+
+  <div id="loggedOutAccount">
+
+    <h2>
+      Synchronisation
+    </h2>
+
+    <p class="account-description">
+      Melde dich an, um deine Übungsbibliothek
+      später zwischen mehreren Geräten zu synchronisieren.
+    </p>
+
+    <div class="account-fields">
+
+      <input
+        id="authEmail"
+        type="email"
+        placeholder="E-Mail-Adresse"
+        autocomplete="email"
+      >
+
+      <input
+        id="authPassword"
+        type="password"
+        placeholder="Passwort"
+        autocomplete="current-password"
+      >
+
+    </div>
+
+    <div class="account-actions">
+
+      <button
+        id="signInButton"
+        class="continue-button"
+        type="button"
+      >
+        Anmelden
+      </button>
+
+      <button
+        id="signUpButton"
+        class="secondary-button"
+        type="button"
+      >
+        Registrieren
+      </button>
+
+    </div>
+
+    <p
+      id="authMessage"
+      class="auth-message"
+    ></p>
+
+  </div>
+
+
+  <div
+    id="loggedInAccount"
+    hidden
+  >
+
+    <h2>
+      Synchronisation
+    </h2>
+
+    <p>
+      Angemeldet als
+      <strong id="loggedInEmail"></strong>
+    </p>
+
+    <p class="account-status">
+      ● Supabase verbunden
+    </p>
+
+    <button
+      id="signOutButton"
+      class="secondary-button"
+      type="button"
+    >
+      Abmelden
+    </button>
+
+  </div>
+
+</section>
+
   <!-- =================================
      BACKUP & DATEN
 ================================== -->

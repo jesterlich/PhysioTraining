@@ -1377,3 +1377,125 @@ gap: 10px;
   }
 
 }
+
+/* ============================= */
+/* BACKUP & DATEN                */
+/* ============================= */
+
+.backup-section {
+  margin-top: 32px;
+  padding: 22px;
+  background: white;
+  border: 1px solid #dfe9e8;
+  border-radius: 16px;
+}
+
+.backup-section h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.backup-description {
+  margin: 0 0 18px;
+  color: #66706f;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.backup-actions button {
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+
+  .backup-actions {
+    flex-direction: column;
+  }
+
+  .backup-actions button {
+    width: 100%;
+  }
+
+}
+
+/* ============================= */
+/* ACCOUNT / SYNCHRONISATION     */
+/* ============================= */
+
+.account-section {
+  margin-top: 32px;
+  padding: 22px;
+  background: white;
+  border: 1px solid #dfe9e8;
+  border-radius: 16px;
+}
+
+.account-section h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.account-description {
+  margin: 0 0 18px;
+  color: #66706f;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.account-fields {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.account-fields input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #cfdcda;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.account-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.account-actions button {
+  margin: 0;
+}
+
+.auth-message {
+  margin-top: 14px;
+  margin-bottom: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.account-status {
+  color: #256f6c;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+
+  .account-actions {
+    flex-direction: column;
+  }
+
+  .account-actions button {
+    width: 100%;
+  }
+
+}
