@@ -104,6 +104,51 @@
 
   </main>
 
+  <!-- =================================
+     BACKUP & DATEN
+================================== -->
+
+<section class="backup-section">
+
+  <h2>
+    Daten & Backup
+  </h2>
+
+  <p class="backup-description">
+    Sichere deine Übungsbibliothek und
+    gespeicherten Trainingspläne oder
+    stelle ein vorhandenes Backup wieder her.
+  </p>
+
+  <div class="backup-actions">
+
+    <button
+      id="exportBackupButton"
+      class="secondary-button"
+      type="button"
+    >
+      ↓ Backup erstellen
+    </button>
+
+    <button
+      id="importBackupButton"
+      class="secondary-button"
+      type="button"
+    >
+      ↑ Backup importieren
+    </button>
+
+  </div>
+
+  <input
+    id="backupFileInput"
+    type="file"
+    accept=".json,application/json"
+    hidden
+  >
+
+</section>
+
 
   <!-- ÜBUNGSAUSWAHL -->
   <main class="app-container view" id="exerciseView">
@@ -734,8 +779,11 @@
 
 </main>
 
- <script src="vendor/jspdf.umd.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
 <script src="vendor/jspdf.plugin.autotable.min.js"></script>
+
+<script src="vendor/supabase.js"></script>
+
 <script src="app.js"></script>
 
 </body>

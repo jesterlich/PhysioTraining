@@ -1,3 +1,25 @@
+// =====================================
+// SUPABASE
+// =====================================
+
+const SUPABASE_URL =
+  "https://cizrbsgdlwwtrnbculeo.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_9qwbY345i7RQ8GgZ1Dr5YA_3yKCKY3p";
+
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+
+
+console.log(
+  "Supabase verbunden."
+);
+
 const homeView = document.getElementById("homeView");
 const exerciseView = document.getElementById("exerciseView");
 
@@ -752,10 +774,23 @@ function getPlanData() {
 
   cards.forEach(function (card) {
 
-    const name =
-      card.querySelector("h3").innerText
-        .replace(/^\d+\s*/, "")
-        .trim();
+    const heading =
+  card.querySelector("h3");
+
+const headingCopy =
+  heading.cloneNode(true);
+
+const numberElement =
+  headingCopy.querySelector(
+    ".exercise-number"
+  );
+
+if (numberElement) {
+  numberElement.remove();
+}
+
+const name =
+  headingCopy.textContent.trim();
 
     const inputs =
       card.querySelectorAll("input");
@@ -1337,6 +1372,81 @@ const sharePdfButton =
     "sharePdfButton"
   );
 
+// =====================================
+// PDF-KOPFBEREICH
+// =====================================
+
+function drawPdfHeader(
+  doc,
+  planName
+) {
+
+  doc.setFont(
+    "helvetica",
+    "bold"
+  );
+
+  doc.setFontSize(8);
+
+  doc.text(
+    "PHYSIO TRAINING",
+    10,
+    9
+  );
+
+
+  doc.setFontSize(14);
+
+  doc.text(
+    "Trainings- und Belastungsprotokoll",
+    10,
+    16
+  );
+
+
+  doc.setFont(
+    "helvetica",
+    "normal"
+  );
+
+  doc.setFontSize(8);
+
+  doc.text(
+    "Trainingsplan: " +
+      planName,
+    10,
+    22
+  );
+
+
+  doc.text(
+    "Zeitraum: __________________",
+    287,
+    22,
+    {
+      align: "right"
+    }
+  );
+
+
+  doc.setDrawColor(
+    60,
+    70,
+    75
+  );
+
+  doc.setLineWidth(
+    0.4
+  );
+
+  doc.line(
+    10,
+    25,
+    287,
+    25
+  );
+
+}
 
 function createPdfDocument() {
 
@@ -1409,55 +1519,7 @@ function createPdfDocument() {
 
 
   // =================================
-  // KOPFBEREICH
-  // =================================
-
-  doc.setFont(
-    "helvetica",
-    "bold"
-  );
-
-  doc.setFontSize(8);
-
-  doc.text(
-    "PHYSIO TRAINING",
-    10,
-    10
-  );
-
-
-  doc.setFontSize(15);
-
-  doc.text(
-    "Trainings- und Belastungsprotokoll",
-    10,
-    17
-  );
-
-
-  doc.setFont(
-    "helvetica",
-    "normal"
-  );
-
-  doc.setFontSize(9);
-
-  doc.text(
-    "Trainingsplan: " + planName,
-    10,
-    23
-  );
-
-
-  doc.text(
-    "Zeitraum: __________________",
-    230,
-    23
-  );
-
-
-  // =================================
-  // HAUPTTABELLE
+  // TABELLENKOPF
   // =================================
 
   const tableHead = [
@@ -1479,6 +1541,10 @@ function createPdfDocument() {
 
   }
 
+
+  // =================================
+  // ÜBUNGSZEILEN
+  // =================================
 
   const tableBody = [];
 
@@ -1508,9 +1574,7 @@ function createPdfDocument() {
       if (exercise.weight) {
 
         if (prescription) {
-
           prescription += " · ";
-
         }
 
         prescription +=
@@ -1522,9 +1586,7 @@ function createPdfDocument() {
       if (exercise.free) {
 
         if (prescription) {
-
           prescription += " · ";
-
         }
 
         prescription +=
@@ -1540,7 +1602,8 @@ function createPdfDocument() {
       if (prescription) {
 
         exerciseText +=
-          "\n" + prescription;
+          "\n" +
+          prescription;
 
       }
 
@@ -1548,7 +1611,8 @@ function createPdfDocument() {
       if (exercise.note) {
 
         exerciseText +=
-          "\n" + exercise.note;
+          "\n" +
+          exercise.note;
 
       }
 
@@ -1602,17 +1666,23 @@ function createPdfDocument() {
   );
 
 
+  // =================================
+  // TRAININGSTABELLE
+  // =================================
+
   doc.autoTable({
 
-    startY: 28,
+    startY: 29,
 
     head: tableHead,
 
     body: tableBody,
 
     margin: {
+      top: 29,
       left: 10,
-      right: 10
+      right: 10,
+      bottom: 12
     },
 
     theme: "grid",
@@ -1623,7 +1693,8 @@ function createPdfDocument() {
       cellPadding: 2,
       valign: "middle",
       overflow: "linebreak",
-      lineWidth: 0.15
+      lineWidth: 0.15,
+      minCellHeight: 8
     },
 
     headStyles: {
@@ -1643,40 +1714,61 @@ function createPdfDocument() {
       "avoid",
 
     showHead:
-      "everyPage"
+      "everyPage",
+
+    didParseCell:
+      function (data) {
+
+        if (
+          includePain &&
+          data.section === "body" &&
+          data.row.index % 2 === 1
+        ) {
+
+          data.cell.styles.fontSize =
+            6;
+
+          data.cell.styles.fillColor =
+            [248, 248, 248];
+
+          data.cell.styles.minCellHeight =
+            6;
+
+        }
+
+      },
+
+    didDrawPage:
+      function () {
+
+        drawPdfHeader(
+          doc,
+          planName
+        );
+
+      }
 
   });
 
 
   // =================================
-  // POSITION NACH DER TABELLE
+  // POSITION NACH TRAININGSTABELLE
   // =================================
 
   let currentY =
-    doc.lastAutoTable.finalY + 5;
+    doc.lastAutoTable.finalY + 6;
 
 
   const pageHeight =
     doc.internal.pageSize.getHeight();
 
 
-  // Genug Platz für Monitoring /
-  // Notizen sicherstellen
-
-  if (
-    currentY >
-    pageHeight - 40
-  ) {
-
-    doc.addPage();
-
-    currentY = 15;
-
-  }
+  const pageBottom =
+    pageHeight - 14;
 
 
   // =================================
-  // ALLGEMEINES MONITORING
+  // MONITORING-DATEN
   // =================================
 
   const monitoringRows = [];
@@ -1709,9 +1801,48 @@ function createPdfDocument() {
   }
 
 
+  // =================================
+  // PLATZ FÜR MONITORING PRÜFEN
+  // =================================
+
   if (
     monitoringRows.length > 0
   ) {
+
+    const requiredMonitoringSpace =
+      12 +
+      monitoringRows.length * 8;
+
+
+if (
+  currentY +
+    requiredMonitoringSpace >
+  pageBottom
+) {
+
+  doc.addPage();
+
+  currentY = 31;
+
+}
+
+
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
+    doc.setFontSize(8);
+
+    doc.text(
+      "Allgemeines Monitoring",
+      10,
+      currentY
+    );
+
+
+    currentY += 4;
+
 
     const monitoringBody =
       monitoringRows.map(
@@ -1746,8 +1877,10 @@ function createPdfDocument() {
       body: monitoringBody,
 
       margin: {
+        top: 29,
         left: 10,
-        right: 10
+        right: 10,
+        bottom: 12
       },
 
       theme: "grid",
@@ -1756,7 +1889,8 @@ function createPdfDocument() {
         font: "helvetica",
         fontSize: 6.5,
         cellPadding: 2,
-        minCellHeight: 7
+        minCellHeight: 7,
+        valign: "middle"
       },
 
       columnStyles: {
@@ -1764,13 +1898,26 @@ function createPdfDocument() {
           cellWidth: 52,
           fontStyle: "bold"
         }
-      }
+      },
+
+      rowPageBreak:
+        "avoid",
+
+      didDrawPage:
+        function () {
+
+          drawPdfHeader(
+            doc,
+            planName
+          );
+
+        }
 
     });
 
 
     currentY =
-      doc.lastAutoTable.finalY + 5;
+      doc.lastAutoTable.finalY + 7;
 
   }
 
@@ -1781,14 +1928,24 @@ function createPdfDocument() {
 
   if (includeNotes) {
 
+    const requiredNotesSpace =
+      32;
+
+
     if (
-      currentY >
-      pageHeight - 30
+      currentY +
+        requiredNotesSpace >
+      pageBottom
     ) {
 
       doc.addPage();
 
-      currentY = 15;
+      drawPdfHeader(
+        doc,
+        planName
+      );
+
+      currentY = 31;
 
     }
 
@@ -1807,7 +1964,7 @@ function createPdfDocument() {
     );
 
 
-    currentY += 5;
+    currentY += 6;
 
 
     doc.setDrawColor(
@@ -1853,12 +2010,15 @@ function createPdfDocument() {
 
     doc.setPage(page);
 
+
     doc.setFont(
       "helvetica",
       "normal"
     );
 
+
     doc.setFontSize(7);
+
 
     doc.text(
       "Seite " +
@@ -1878,7 +2038,6 @@ function createPdfDocument() {
   return doc;
 
 }
-
 
 // =====================================
 // DATEINAME ERSTELLEN
@@ -3453,6 +3612,281 @@ savedPlansList.addEventListener(
     savePlansToStorage();
 
     renderSavedPlans();
+
+  }
+);
+
+// =====================================
+// BACKUP & IMPORT
+// =====================================
+
+const exportBackupButton =
+  document.getElementById(
+    "exportBackupButton"
+  );
+
+const importBackupButton =
+  document.getElementById(
+    "importBackupButton"
+  );
+
+const backupFileInput =
+  document.getElementById(
+    "backupFileInput"
+  );
+
+
+// =====================================
+// BACKUP ERSTELLEN
+// =====================================
+
+exportBackupButton.addEventListener(
+  "click",
+  function () {
+
+    const backup = {
+
+      app:
+        "PhysioTraining",
+
+      version:
+        1,
+
+      createdAt:
+        new Date().toISOString(),
+
+      exerciseLibrary:
+        JSON.parse(
+          localStorage.getItem(
+            "exerciseLibrary"
+          )
+        ) || [],
+
+      savedPlans:
+        JSON.parse(
+          localStorage.getItem(
+            "savedPlans"
+          )
+        ) || []
+
+    };
+
+
+    const backupText =
+      JSON.stringify(
+        backup,
+        null,
+        2
+      );
+
+
+    const backupBlob =
+      new Blob(
+        [backupText],
+        {
+          type:
+            "application/json"
+        }
+      );
+
+
+    const backupUrl =
+      URL.createObjectURL(
+        backupBlob
+      );
+
+
+    const downloadLink =
+      document.createElement(
+        "a"
+      );
+
+
+    const today =
+      new Date()
+        .toISOString()
+        .slice(
+          0,
+          10
+        );
+
+
+    downloadLink.href =
+      backupUrl;
+
+    downloadLink.download =
+      "PhysioTraining_Backup_" +
+      today +
+      ".json";
+
+
+    document.body.appendChild(
+      downloadLink
+    );
+
+
+    downloadLink.click();
+
+
+    downloadLink.remove();
+
+
+    URL.revokeObjectURL(
+      backupUrl
+    );
+
+  }
+);
+
+
+// =====================================
+// DATEI FÜR IMPORT AUSWÄHLEN
+// =====================================
+
+importBackupButton.addEventListener(
+  "click",
+  function () {
+
+    backupFileInput.click();
+
+  }
+);
+
+
+// =====================================
+// BACKUP IMPORTIEREN
+// =====================================
+
+backupFileInput.addEventListener(
+  "change",
+  function () {
+
+    const file =
+      backupFileInput.files[0];
+
+
+    if (!file) {
+      return;
+    }
+
+
+    const reader =
+      new FileReader();
+
+
+    reader.onload =
+      function (event) {
+
+        try {
+
+          const backup =
+            JSON.parse(
+              event.target.result
+            );
+
+
+          // =========================
+          // BACKUP PRÜFEN
+          // =========================
+
+          if (
+            backup.app !==
+            "PhysioTraining"
+          ) {
+
+            alert(
+              "Diese Datei ist kein gültiges PhysioTraining-Backup."
+            );
+
+            return;
+          }
+
+
+          if (
+            !Array.isArray(
+              backup.exerciseLibrary
+            ) ||
+            !Array.isArray(
+              backup.savedPlans
+            )
+          ) {
+
+            alert(
+              "Das Backup ist unvollständig oder beschädigt."
+            );
+
+            return;
+          }
+
+
+          // =========================
+          // BESTÄTIGUNG
+          // =========================
+
+          const confirmed =
+            confirm(
+              "Backup wiederherstellen?\n\n" +
+              "Dabei werden die aktuelle Übungsbibliothek und die gespeicherten Trainingspläne auf diesem Gerät ersetzt."
+            );
+
+
+          if (!confirmed) {
+            return;
+          }
+
+
+          // =========================
+          // DATEN SPEICHERN
+          // =========================
+
+          localStorage.setItem(
+            "exerciseLibrary",
+            JSON.stringify(
+              backup.exerciseLibrary
+            )
+          );
+
+
+          localStorage.setItem(
+            "savedPlans",
+            JSON.stringify(
+              backup.savedPlans
+            )
+          );
+
+
+          alert(
+            "Backup erfolgreich wiederhergestellt. Die App wird jetzt neu geladen."
+          );
+
+
+          window.location.reload();
+
+        } catch (error) {
+
+          console.error(
+            "Backup konnte nicht importiert werden:",
+            error
+          );
+
+
+          alert(
+            "Die Backup-Datei konnte nicht gelesen werden."
+          );
+
+        } finally {
+
+          backupFileInput.value =
+            "";
+
+        }
+
+      };
+
+
+    reader.readAsText(
+      file
+    );
 
   }
 );
